@@ -1,0 +1,53 @@
+<div id="dh-horde-db-root">
+  <div class="dh-db-scroll">
+    {{#if groups.length}}
+      {{#each groups}}
+      <div class="dh-group-wrapper">
+        <div class="dh-row" data-group-id="{{id}}">
+          <div class="dh-badge">{{groupIndex}}</div>
+          <div class="dh-info">
+            <div class="dh-name">{{leaderName}}</div>
+            <div class="dh-sub">{{memberCount}} members &middot; {{sceneName}}</div>
+          </div>
+          <div class="dh-actions">
+            <button type="button" class="dh-btn dh-btn-sm" data-action="findLeader" data-group-id="{{id}}" data-tooltip="Pan to leader">
+              <i class="fas fa-search"></i>
+            </button>
+            <button type="button" class="dh-btn dh-btn-sm" data-action="expand" data-group-id="{{id}}">
+              <i class="fas fa-users"></i> Members
+            </button>
+            <button type="button" class="dh-btn dh-btn-sm dh-btn-red" data-action="dissolve" data-group-id="{{id}}">
+              <i class="fas fa-times"></i> Dissolve
+            </button>
+          </div>
+        </div>
+
+        <div class="dh-members-list" data-group-id="{{id}}" hidden>
+          {{#each members}}
+          <div class="dh-member-row">
+            <span class="dh-member-name">
+              {{#if isLeader}}<i class="fas fa-crown dh-leader-icon"></i> {{/if}}{{name}}
+            </span>
+            <div class="dh-member-actions">
+              {{#unless isLeader}}
+              <button type="button" class="dh-btn dh-btn-xs" data-action="promoteLeader" data-group-id="{{../id}}" data-member-id="{{id}}" data-tooltip="Promote to leader">
+                <i class="fas fa-crown"></i>
+              </button>
+              {{/unless}}
+              <button type="button" class="dh-btn dh-btn-xs dh-btn-red" data-action="removeMember" data-group-id="{{../id}}" data-member-id="{{id}}" data-tooltip="Remove from horde">
+                <i class="fas fa-user-minus"></i>
+              </button>
+            </div>
+          </div>
+          {{/each}}
+        </div>
+      </div>
+      {{/each}}
+    {{else}}
+      <div class="dh-empty">
+        <i class="fas fa-chess-rook"></i>
+        <p>No active horde groups.</p>
+      </div>
+    {{/if}}
+  </div>
+</div>

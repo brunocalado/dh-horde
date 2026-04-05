@@ -1,0 +1,49 @@
+<div id="dh-horde-hud-root">
+  <div class="dh-info-banner">
+    <strong>{{tokenName}}</strong>
+    {{#if hasGroup}}
+      — Horde ({{memberCount}} members)
+    {{else}}
+      — Ready to multiply
+    {{/if}}
+  </div>
+
+  <div class="dh-horde-actions">
+
+    {{!-- Multiply: only when no group exists yet --}}
+    {{#unless hasGroup}}
+    <button type="button" class="dh-btn dh-btn-green" data-action="multiply">
+      <i class="fas fa-clone"></i> Multiply Horde
+    </button>
+    {{/unless}}
+
+    {{!-- Move buttons: only when group exists --}}
+    {{#if hasGroup}}
+      {{#if hasTargets}}
+        <button type="button" class="dh-btn dh-btn-blue" data-action="move-close">
+          <i class="fas fa-shoe-prints"></i> Move Close
+        </button>
+        <button type="button" class="dh-btn dh-btn-indigo" data-action="move-far">
+          <i class="fas fa-running"></i> Move Far
+        </button>
+        <button type="button" class="dh-btn dh-btn-amber" data-action="move-all">
+          <i class="fas fa-bolt"></i> Move All
+        </button>
+      {{else}}
+        <div class="dh-hint">
+          <i class="fas fa-crosshairs"></i> Target a token to enable movement.
+        </div>
+      {{/if}}
+
+      <button type="button" class="dh-btn dh-btn-red" data-action="dissolve">
+        <i class="fas fa-skull"></i> Dissolve Horde
+      </button>
+    {{/if}}
+
+    <hr class="dh-divider">
+
+    <button type="button" class="dh-btn dh-btn-ghost" data-action="open-dashboard">
+      <i class="fas fa-th-list"></i> Dashboard
+    </button>
+  </div>
+</div>

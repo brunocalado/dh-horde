@@ -1,0 +1,135 @@
+/* =============================================================
+   DH Horde — HUD Dialog styles
+   ============================================================= */
+
+/* Token HUD button */
+.dh-horde-hud-btn {
+  background: var(--dh-surface) !important;
+  border: 1px solid var(--dh-border) !important;
+}
+.dh-horde-hud-btn:hover {
+  border-color: var(--dh-amber) !important;
+  color: var(--dh-amber) !important;
+}
+
+/* Dialog root */
+#dh-horde-hud-root {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 6px 2px;
+}
+
+.dh-horde-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ── Buttons ──────────────────────────────────────────── */
+
+.dh-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: var(--dh-radius);
+  border: 1px solid var(--dh-border);
+  background: var(--dh-surface);
+  color: var(--dh-text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.dh-btn:hover {
+  background: var(--dh-surface-2);
+  border-color: var(--dh-border-hover);
+}
+
+.dh-btn-green {
+  background: var(--dh-green-bg);
+  border-color: var(--dh-green-border);
+  color: var(--dh-green);
+}
+.dh-btn-green:hover {
+  background: var(--dh-green);
+  color: #fff;
+}
+
+.dh-btn-blue {
+  background: var(--dh-blue-bg);
+  border-color: var(--dh-blue-border);
+  color: var(--dh-blue);
+}
+.dh-btn-blue:hover {
+  background: var(--dh-blue);
+  color: #fff;
+}
+
+.dh-btn-indigo {
+  background: var(--dh-indigo-bg);
+  border-color: var(--dh-indigo-border);
+  color: var(--dh-indigo);
+}
+.dh-btn-indigo:hover {
+  background: var(--dh-indigo);
+  color: #fff;
+}
+
+.dh-btn-amber {
+  background: var(--dh-amber-bg);
+  border-color: var(--dh-amber-border);
+  color: var(--dh-amber);
+}
+.dh-btn-amber:hover {
+  background: var(--dh-amber);
+  color: #1a1209;
+}
+
+.dh-btn-red {
+  background: var(--dh-red-bg);
+  border-color: var(--dh-red-border);
+  color: var(--dh-red);
+}
+.dh-btn-red:hover {
+  background: var(--dh-red);
+  color: #fff;
+}
+
+.dh-btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--dh-text);
+  font-size: 11px;
+}
+.dh-btn-ghost:hover {
+  color: var(--dh-text);
+  background: var(--dh-surface);
+}
+
+/* ── Hint text ────────────────────────────────────────── */
+
+.dh-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--dh-surface);
+  border-radius: var(--dh-radius);
+  color: var(--dh-text-muted);
+  font-size: 11px;
+  font-style: italic;
+}
+.dh-hint i {
+  color: var(--dh-amber);
+}
+
+/* ── Divider ─────────────────────────────────────────── */
+
+.dh-divider {
+  border: none;
+  border-top: 1px solid var(--dh-border);
+  margin: 2px 0;
+}

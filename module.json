@@ -1,0 +1,42 @@
+{
+  "id": "dh-horde",
+  "title": "Daggerheart: Horde",
+  "description": "Manage horde tokens: multiply and move.",
+  "version": "0.0.1",
+
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13"
+  },
+
+  "relationships": {
+    "systems": [
+      {
+        "id": "daggerheart",
+        "type": "system",
+        "compatibility": {
+          "minimum": "1.9.0"
+        }
+      }
+    ]
+  }, 
+
+  "authors": [
+    {
+      "name": "Mestre Digital"
+    }
+  ],
+
+  "styles": [
+    "styles/base.css",
+    "styles/horde-hud.css",
+    "styles/dashboard.css"
+  ],
+  "esmodules": [
+    "scripts/main.js"
+  ],
+
+  "url": "https://github.com/brunocalado/dh-horde",
+  "manifest": "https://raw.githubusercontent.com/brunocalado/dh-horde/main/module.json",
+  "download": "https://codeload.github.com/brunocalado/dh-horde/zip/main"
+}

@@ -1,0 +1,77 @@
+/* =============================================================
+   DH Horde — Design Token Foundation
+   Loaded first; all other module CSS files consume these vars.
+   ============================================================= */
+
+:root {
+  /* --- Surfaces -------------------------------------------- */
+  --dh-bg:           #12141a;
+  --dh-surface:      #1a1d25;
+  --dh-surface-2:    #222630;
+
+  /* --- Borders --------------------------------------------- */
+  --dh-border:       rgba(255, 255, 255, 0.10);
+  --dh-border-hover: rgba(255, 255, 255, 0.22);
+
+  /* --- Text ------------------------------------------------- */
+  --dh-text:         #f0f2fa;
+  --dh-text-muted:   #b0b5c8;
+  --dh-text-dim:     #8b91a8;
+
+  /* --- Semantic accent colours ----------------------------- */
+  --dh-blue:         #60a5fa;
+  --dh-blue-bg:      rgba(59,  130, 246, 0.20);
+  --dh-blue-border:  rgba(96,  165, 250, 0.50);
+
+  --dh-indigo:       #818cf8;
+  --dh-indigo-bg:    rgba(99,  102, 241, 0.20);
+  --dh-indigo-border:rgba(129, 140, 248, 0.50);
+
+  --dh-green:        #34d399;
+  --dh-green-bg:     rgba(16,  185, 129, 0.20);
+  --dh-green-border: rgba(52,  211, 153, 0.50);
+
+  --dh-red:          #f87171;
+  --dh-red-bg:       rgba(239,  68,  68, 0.18);
+  --dh-red-border:   rgba(248, 113, 113, 0.50);
+
+  --dh-amber:        #fbbf24;
+  --dh-amber-bg:     rgba(245, 158,  11, 0.18);
+  --dh-amber-border: rgba(251, 191,  36, 0.55);
+
+  /* --- Radius / spacing ------------------------------------ */
+  --dh-radius:       7px;
+  --dh-radius-sm:    4px;
+}
+
+/* =============================================================
+   Suppress Foundry window-chrome close on HUD dialog
+   ============================================================= */
+#dh-horde-hud-dialog .window-header .header-button.close {
+  display: none !important;
+}
+
+/* =============================================================
+   Shared scrollbar styles
+   ============================================================= */
+.dh-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.dh-scroll::-webkit-scrollbar           { width: 5px; }
+.dh-scroll::-webkit-scrollbar-track     { background: transparent; }
+.dh-scroll::-webkit-scrollbar-thumb     { background: var(--dh-surface-2); border-radius: 3px; }
+.dh-scroll::-webkit-scrollbar-thumb:hover { background: var(--dh-border-hover); }
+
+/* =============================================================
+   Shared info-banner
+   ============================================================= */
+.dh-info-banner {
+  background: var(--dh-surface);
+  border-left: 2px solid var(--dh-blue);
+  border-radius: 0 var(--dh-radius-sm) var(--dh-radius-sm) 0;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--dh-text);
+  line-height: 1.55;
+}
