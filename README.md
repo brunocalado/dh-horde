@@ -8,6 +8,11 @@ A standard horde token is a lie. It says "Giant Mosquitoes × 30" in the corner 
 
 With one click, your single horde token **explodes into dozens of individual tokens** that spread across the battlefield. Players see the swarm. They feel surrounded. When their attacks land and tokens start disappearing, the map itself tells the story. That's what a horde is supposed to feel like.
 
+
+![Multiply](docs/horde1.gif)
+
+![Move](docs/horde2.gif)
+
 ---
 
 ## What It Does
