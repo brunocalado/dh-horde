@@ -2,7 +2,7 @@
   "id": "dh-horde",
   "title": "Daggerheart: Horde",
   "description": "Manage horde tokens: multiply and move.",
-  "version": "0.0.1",
+  "version": "0.0.2",
 
   "compatibility": {
     "minimum": "13",

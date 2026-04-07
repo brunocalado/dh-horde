@@ -83,26 +83,6 @@ export class Config {
             default: []
         });
 
-        // ── Movement distance settings ────────────────────────────────────
-        game.settings.register(MOD_ID, 'closeMoveDistance', {
-            name: 'Close Move Distance',
-            hint: 'Number of grid squares for Close movement (default 6 = 30 ft).',
-            scope: 'world',
-            config: true,
-            type: Number,
-            default: 6,
-            range: { min: 1, max: 30, step: 1 }
-        });
-
-        game.settings.register(MOD_ID, 'farMoveDistance', {
-            name: 'Far Move Distance',
-            hint: 'Number of grid squares for Far movement (default 12 = 60 ft).',
-            scope: 'world',
-            config: true,
-            type: Number,
-            default: 12,
-            range: { min: 1, max: 60, step: 1 }
-        });
     }
 
     // ─────────────────────────────────────────────────────────────────────

@@ -1,5 +1,3 @@
-import { Config } from './config.js';
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Horde Executor — Token creation (multiply) and movement animation engine
 // ─────────────────────────────────────────────────────────────────────────────
@@ -21,6 +19,10 @@ const SPAWN_INTERVAL = 150;
 const SPAWN_ANIM_PER_CELL = 180;
 // Maximum total animation time for the spawn-crawl (ms).
 const SPAWN_ANIM_MAX = 2000;
+
+// Fixed movement distances (grid squares). 6 = 30 ft Close, 12 = 60 ft Far.
+const CLOSE_MOVE_DISTANCE = 6;
+const FAR_MOVE_DISTANCE   = 12;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Horde-specific operations
@@ -246,9 +248,7 @@ export async function moveHordeTowardTarget(memberTokens, targets, mode) {
     }
 
     // ── 'close' / 'far' modes: step toward spiral slot, stop after maxStep cells ──
-    const maxStep = (mode === 'far')
-        ? Config.setting('farMoveDistance')
-        : Config.setting('closeMoveDistance');
+    const maxStep = (mode === 'far') ? FAR_MOVE_DISTANCE : CLOSE_MOVE_DISTANCE;
 
     const hordeIds      = new Set(memberTokens.map(t => t.id));
     const reservedCells = new Set();
