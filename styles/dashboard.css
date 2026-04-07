@@ -2,15 +2,25 @@
    DH Horde — Dashboard styles
    ============================================================= */
 
-#dh-horde-db-root {
-  background: var(--dh-bg);
-  height: 100%;
+/* AppV2 container — same pattern as group-tokens dashboard */
+.dh-horde-dashboard-app .window-content {
   display: flex;
   flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
+#dh-horde-db-root {
+  background: var(--dh-bg);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
 .dh-db-scroll {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 8px;
@@ -24,6 +34,10 @@
 .dh-db-scroll::-webkit-scrollbar-thumb:hover { background: var(--dh-border-hover); }
 
 /* ── Group row ───────────────────────────────────────────── */
+
+.dh-db-scroll > * {
+  flex-shrink: 0;
+}
 
 .dh-group-wrapper {
   border: 1px solid var(--dh-border);

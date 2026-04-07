@@ -89,8 +89,14 @@ export class Dashboard extends HandlebarsApplicationMixin(ApplicationV2) {
     // RENDER LIFECYCLE
     // -----------------------------------------
 
+    /**
+     * Post-render hook — restores expanded group panels.
+     * @param {object} context - prepared template data
+     * @param {object} options - render options
+     */
     _onRender(context, options) {
         super._onRender(context, options);
+
         for (const groupId of this.#expandedGroups) {
             const list = this.element.querySelector(`.dh-members-list[data-group-id="${groupId}"]`);
             const btn  = this.element.querySelector(`[data-action="expand"][data-group-id="${groupId}"]`);
