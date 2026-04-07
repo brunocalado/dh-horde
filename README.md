@@ -118,12 +118,6 @@ https://raw.githubusercontent.com/brunocalado/dh-horde/main/module.json
 
 * **Code License:** GNU GPLv3.
 
-* **get-over-here.mp3:** [https://pixabay.com/service/license-summary/](https://pixabay.com/service/license-summary/)
-
-* **audio_explode:** Navadaux for the "explode" sound provided via freesound.org, released under CCO 1.0 license
-
-* **audio_crunch:** Glaneur de sons for the "crunch" sound provided via freesound.org, released under CC BY 3.0 license
-
 * **banner.webp and thumbnail.webp:** [Link](https://pt.pngtree.com/freepng/tiny-spartans-might-in-miniature-form_23041278.html)
 
 * **Disclaimer:** This module is an independent creation and is not affiliated with Darrington Press.
