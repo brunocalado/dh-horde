@@ -5,8 +5,9 @@
   "version": "0.0.2",
 
   "compatibility": {
-    "minimum": "13",
-    "verified": "13"
+    "minimum": 13,
+    "verified": 13,
+    "maximum": 13
   },
 
   "relationships": {
@@ -35,6 +36,12 @@
   "esmodules": [
     "scripts/main.js"
   ],
+
+  "media": [{
+    "type": "setup",
+    "url": "modules/dh-horde/assets/images/thumbnail.webp",
+    "thumbnail": "modules/dh-horde/assets/images/thumbnail.webp"
+  }], 
 
   "url": "https://github.com/brunocalado/dh-horde",
   "manifest": "https://raw.githubusercontent.com/brunocalado/dh-horde/main/module.json",
