@@ -4,6 +4,8 @@
 
 A standard horde token is a lie. It says "Giant Mosquitoes × 30" in the corner of a single token, and everyone at the table imagines something terrifying — but the map shows nothing. No sense of scale. No visual threat. When a player kills half of them, the token just gets a number edited. It feels like nothing.
 
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Donate-red?style=for-the-badge&logo=buy-me-a-coffee)](https://buymeacoffee.com/mestredigital)
+
 **DH Horde fixes that.**
 
 With one click, your single horde token **explodes into dozens of individual tokens** that spread across the battlefield. Players see the swarm. They feel surrounded. When their attacks land and tokens start disappearing, the map itself tells the story. That's what a horde is supposed to feel like.
@@ -12,9 +14,6 @@ With one click, your single horde token **explodes into dozens of individual tok
 ![Multiply](docs/horde1.gif)
 
 ![Move](docs/horde2.gif)
-
-
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Donate-red?style=for-the-badge&logo=buy-me-a-coffee)](https://buymeacoffee.com/mestredigital)
 
 ---
 
@@ -132,12 +131,13 @@ https://raw.githubusercontent.com/brunocalado/dh-horde/main/module.json
 | :--- | :--- |
 | 💀 [**Adversary Manager**](https://github.com/brunocalado/daggerheart-advmanager) | Scale adversaries instantly and build balanced encounters in Foundry VTT. |
 | 🌟 [**Best Modules**](https://github.com/brunocalado/dh-best-modules) | A curated collection of essential modules to enhance the Daggerheart experience. |
+| 🐉 [**Colossus**](https://github.com/brunocalado/dh-colossus) | Manage massive multi-part boss encounters with independent HP per part and a single shared stress pool. |
 | 💥 [**Critical**](https://github.com/brunocalado/daggerheart-critical) | Animated Critical. |
 | 💠 [**Custom Stat Tracker**](https://github.com/brunocalado/dh-new-stat-tracker) | Add custom trackers to actors. |
 | ☠️ [**Death Moves**](https://github.com/brunocalado/daggerheart-death-moves) | Enhances the Death Move moment with a dramatic interface and full automation. |
 | 📏 [**Distances**](https://github.com/brunocalado/daggerheart-distances) | Visualizes combat ranges with customizable rings and hover calculations. |
 | 📦 [**Extra Content**](https://github.com/brunocalado/daggerheart-extra-content) | Homebrew for Daggerheart. |
-| 🤖 [**Fear Macros**](https://github.com/brunocalado/daggerheart-fear-macros) | Automatically executes macros when the Fear resource is changed. |
+| 🤖 [**Resource Macros**](https://github.com/brunocalado/daggerheart-fear-macros) | Automatically executes macros when the Fear or Hope resources are changed. |
 | 😱 [**Fear Tracker**](https://github.com/brunocalado/daggerheart-fear-tracker) | Adds an animated slider bar with configurable fear tokens to the UI. |
 | 🧟 [**Horde**](https://github.com/brunocalado/dh-horde) | Explode single horde tokens into dozens of individual tokens and manage their movement and stats automatically. |
 | 🎁 [**Mystery Box**](https://github.com/brunocalado/dh-mystery-box) | Introduces mystery box mechanics for random loot and surprises. |
