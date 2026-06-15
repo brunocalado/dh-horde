@@ -80,7 +80,7 @@ export async function createHordeCopies(originToken, count, excludeIds = new Set
         const offset  = spiralOffsets[spiralIdx++];
         const cellX   = leaderCellX + offset.x;
         const cellY   = leaderCellY + offset.y;
-        const snapped = snapPoint(cellX * gs, cellY * gs);
+        const snapped = cellToPoint(cellX, cellY);
         const posKey  = `${snapped.x},${snapped.y}`;
 
         if (reservedPositions.has(posKey)) continue;
@@ -151,16 +151,13 @@ async function spawnCrawl(token, originCell, destCell) {
 
     if (!path || path.length < 2) {
         // Fallback: direct teleport if no path found
-        const sp = snapPoint(destCell.x * gs, destCell.y * gs);
+        const sp = cellToPoint(destCell.x, destCell.y);
         await tokenDoc.update({ x: sp.x, y: sp.y });
         return;
     }
 
     const simplified = simplifyPath(path);
-    const waypoints  = simplified.slice(1).map(cell => {
-        const sp = snapPoint(cell.x * gs, cell.y * gs);
-        return { x: sp.x, y: sp.y };
-    });
+    const waypoints  = simplified.slice(1).map(cell => cellToPoint(cell.x, cell.y));
 
     const duration = Math.min(SPAWN_ANIM_PER_CELL * path.length, SPAWN_ANIM_MAX);
 
@@ -303,7 +300,7 @@ export async function moveHordeTowardTarget(memberTokens, targets, mode) {
                 for (const offset of candidateOffsets) {
                     const cellX   = stopCell.x + offset.x;
                     const cellY   = stopCell.y + offset.y;
-                    const snapped = snapPoint(cellX * gs, cellY * gs);
+                    const snapped = cellToPoint(cellX, cellY);
                     const posKey  = `${snapped.x},${snapped.y}`;
 
                     if (reservedCells.has(posKey)) continue;
@@ -326,7 +323,7 @@ export async function moveHordeTowardTarget(memberTokens, targets, mode) {
             }
 
             usedSlotIndices.add(bestSlotIdx);
-            const snapped = snapPoint(bestDestCell.x * gs, bestDestCell.y * gs);
+            const snapped = cellToPoint(bestDestCell.x, bestDestCell.y);
             reservedCells.add(`${snapped.x},${snapped.y}`);
             assignments.push({ memberToken, destCell: bestDestCell });
         }
@@ -334,7 +331,7 @@ export async function moveHordeTowardTarget(memberTokens, targets, mode) {
 
     const updates = [];
     for (const { memberToken, destCell } of assignments) {
-        const sp = snapPoint(destCell.x * gs, destCell.y * gs);
+        const sp = cellToPoint(destCell.x, destCell.y);
         if (sp.x === memberToken.document.x && sp.y === memberToken.document.y) continue;
         updates.push({ _id: memberToken.id, x: sp.x, y: sp.y });
     }
@@ -368,7 +365,7 @@ async function gatherToken(memberToken, targetCellPos, reservedIds = new Set(), 
             y: targetCellPos.y + offset.y
         };
 
-        const snapped = snapPoint(goalCell.x * gs, goalCell.y * gs);
+        const snapped = cellToPoint(goalCell.x, goalCell.y);
 
         if (isCellOccupied(memberToken, snapped.x, snapped.y, reservedIds)) continue;
 
@@ -378,7 +375,7 @@ async function gatherToken(memberToken, targetCellPos, reservedIds = new Set(), 
         if (preset.stepByStep) {
             for (let i = 1; i < path.length; i++) {
                 const cell = path[i];
-                const sp   = snapPoint(cell.x * gs, cell.y * gs);
+                const sp   = cellToPoint(cell.x, cell.y);
                 await tokenDoc.move(
                     [{ x: sp.x, y: sp.y }],
                     { method: 'api', showRuler: false, constrainOptions: { ignoreWalls: true }, animation: { duration: preset.animPerCell } }
@@ -389,10 +386,7 @@ async function gatherToken(memberToken, targetCellPos, reservedIds = new Set(), 
             }
         } else {
             const simplified = simplifyPath(path);
-            const waypoints  = simplified.slice(1).map(cell => {
-                const sp = snapPoint(cell.x * gs, cell.y * gs);
-                return { x: sp.x, y: sp.y };
-            });
+            const waypoints  = simplified.slice(1).map(cell => cellToPoint(cell.x, cell.y));
             await tokenDoc.move(waypoints, {
                 method: 'api',
                 showRuler: false,
@@ -456,8 +450,10 @@ function findPath(startCell, goalCell, maxIterations = 800) {
 
             if (closedSet.has(nk)) continue;
 
-            const fromCenter = { x: current.x * gs + gs / 2, y: current.y * gs + gs / 2 };
-            const toCenter   = { x: nx * gs + gs / 2,        y: ny * gs + gs / 2 };
+            const fromPt     = cellToPoint(current.x, current.y);
+            const toPt       = cellToPoint(nx, ny);
+            const fromCenter = { x: fromPt.x + gs / 2, y: fromPt.y + gs / 2 };
+            const toCenter   = { x: toPt.x  + gs / 2, y: toPt.y  + gs / 2 };
             const wallHit    = CONFIG.Canvas.polygonBackends.move.testCollision(
                 fromCenter, toCenter, { type: 'move', mode: 'any' }
             );
@@ -494,6 +490,12 @@ function snapPoint(x, y) {
     const snapModes = foundry.CONST.GRID_SNAPPING_MODE ?? foundry.grid?.BaseGrid?.SNAPPING_MODES;
     const mode = snapModes?.TOP_LEFT_VERTEX ?? 1;
     return canvas.grid.getSnappedPoint({ x, y }, { mode });
+}
+
+// Converts grid cell coordinates {j=column, i=row} to canvas pixel coordinates,
+// correctly accounting for the scene's grid offset.
+function cellToPoint(j, i) {
+    return canvas.grid.getTopLeftPoint({ i, j });
 }
 
 function generateSpiralPositions(count, startRing = 1) {
