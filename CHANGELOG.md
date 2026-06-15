@@ -1,3 +1,8 @@
+# 0.0.4
+
+### Fixed
+- **Multiply** now uses the actor's current remaining HP (`hitPoints.max - hitPoints.value`) instead of always using `hitPoints.max`. A damaged horde token is expanded into the correct number of copies rather than the full horde size.
+
 # 0.0.3
 
 - v14 only

@@ -252,8 +252,9 @@ export class HordeManager {
      * Before creating copies, ensures the origin token has actorLink: false
      * so all copies (which inherit baseData) are also unlinked from the actor.
      *
-     * Reads system.hordeHp and system.resources.hitPoints.max from the actor,
-     * creates (hordeHp * hitPoints.max) copies in a spiral pattern, and forms a horde group.
+     * Reads system.hordeHp and the current remaining HP from the actor,
+     * creates (hordeHp * remainingHp) copies in a spiral pattern, and forms a horde group.
+     * Remaining HP = hitPoints.max - hitPoints.value (inverted tracking: value increases with damage).
      * @param {Token} token - The original horde token
      * @returns {Promise<void>}
      */
@@ -264,15 +265,17 @@ export class HordeManager {
             return;
         }
 
-        const hordeHp = actor.system?.hordeHp;
-        const maxHp   = actor.system?.resources?.hitPoints?.max;
+        const hordeHp    = actor.system?.hordeHp;
+        const maxHp      = actor.system?.resources?.hitPoints?.max;
+        const currentHp  = actor.system?.resources?.hitPoints?.value ?? 0;
+        const remaining  = maxHp - currentHp;
 
         if (!hordeHp || !maxHp) {
             ui.notifications.warn(`[${Config.data.modTitle}] Token actor is missing hordeHp or hitPoints.max values.`);
             return;
         }
 
-        const count = hordeHp * maxHp;
+        const count = hordeHp * remaining;
         if (count <= 0) {
             ui.notifications.warn(`[${Config.data.modTitle}] Computed horde count is 0 or negative.`);
             return;
