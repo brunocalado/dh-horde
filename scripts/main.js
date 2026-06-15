@@ -1,3 +1,4 @@
+import { MODULE_ID } from './constants.js';
 import { Config } from './config.js';
 import { HordeHud } from './horde-hud.js';
 import { HordeManager } from './horde-manager.js';
@@ -33,5 +34,5 @@ Hooks.once('ready', async () => {
     Dashboard.init();
 
     Config.ready = true;
-    console.log(`dh-horde | Ready! v${game.modules.get('dh-horde').version}`);
+    console.log(`dh-horde | Ready! v${game.modules.get(MODULE_ID).version}`);
 });

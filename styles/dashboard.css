@@ -2,198 +2,198 @@
    DH Horde — Dashboard styles
    ============================================================= */
 
-/* AppV2 container — same pattern as group-tokens dashboard */
-.dh-horde-dashboard-app .window-content {
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  overflow: hidden;
-}
+.dh-horde {
+  /* AppV2 container */
+  .window-content {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+  }
 
-#dh-horde-db-root {
-  background: var(--dh-bg);
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-}
+  #dh-horde-db-root {
+    background: var(--dh-bg);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
 
-.dh-db-scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.dh-db-scroll::-webkit-scrollbar           { width: 5px; }
-.dh-db-scroll::-webkit-scrollbar-track     { background: transparent; }
-.dh-db-scroll::-webkit-scrollbar-thumb     { background: var(--dh-surface-2); border-radius: 3px; }
-.dh-db-scroll::-webkit-scrollbar-thumb:hover { background: var(--dh-border-hover); }
+  .dh-db-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 
-/* ── Group row ───────────────────────────────────────────── */
+    &::-webkit-scrollbar           { width: 5px; }
+    &::-webkit-scrollbar-track     { background: transparent; }
+    &::-webkit-scrollbar-thumb     { background: var(--dh-surface-2); border-radius: 3px; }
+    &::-webkit-scrollbar-thumb:hover { background: var(--dh-border-hover); }
 
-.dh-db-scroll > * {
-  flex-shrink: 0;
-}
+    > * { flex-shrink: 0; }
+  }
 
-.dh-group-wrapper {
-  border: 1px solid var(--dh-border);
-  border-radius: var(--dh-radius);
-  overflow: hidden;
-}
+  /* ── Group row ───────────────────────────────────────────── */
 
-.dh-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  background: var(--dh-surface);
-}
+  .dh-group-wrapper {
+    border: 1px solid var(--dh-border);
+    border-radius: var(--dh-radius);
+    overflow: hidden;
+  }
 
-.dh-badge {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: var(--dh-blue-bg);
-  border: 1px solid var(--dh-blue-border);
-  color: var(--dh-blue);
-  font-size: 12px;
-  font-weight: 700;
-  flex-shrink: 0;
-}
+  .dh-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: var(--dh-surface);
+  }
 
-.dh-info {
-  flex: 1;
-  min-width: 0;
-}
+  .dh-badge {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--dh-blue-bg);
+    border: 1px solid var(--dh-blue-border);
+    color: var(--dh-blue);
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
 
-.dh-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--dh-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+  .dh-info {
+    flex: 1;
+    min-width: 0;
+  }
 
-.dh-sub {
-  font-size: 11px;
-  color: var(--dh-text-muted);
-}
+  .dh-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dh-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-.dh-actions {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-}
+  .dh-sub {
+    font-size: 11px;
+    color: var(--dh-text-muted);
+  }
 
-/* ── Small / Extra-small button variants for dashboard ──── */
+  .dh-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
 
-.dh-btn-sm {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border-radius: var(--dh-radius-sm);
-  border: 1px solid var(--dh-border);
-  background: var(--dh-surface-2);
-  color: var(--dh-text-muted);
-  font-size: 11px;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-}
-.dh-btn-sm:hover {
-  background: var(--dh-surface);
-  border-color: var(--dh-border-hover);
-  color: var(--dh-text);
-}
-.dh-btn-sm.dh-btn-red:hover {
-  background: var(--dh-red-bg);
-  border-color: var(--dh-red-border);
-  color: var(--dh-red);
-}
+  /* ── Small / Extra-small button variants for dashboard ──── */
 
-.dh-btn-xs {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 2px 6px;
-  border-radius: var(--dh-radius-sm);
-  border: 1px solid var(--dh-border);
-  background: transparent;
-  color: var(--dh-text-dim);
-  font-size: 10px;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-.dh-btn-xs:hover {
-  background: var(--dh-surface-2);
-  color: var(--dh-text);
-}
-.dh-btn-xs.dh-btn-red:hover {
-  background: var(--dh-red-bg);
-  color: var(--dh-red);
-}
+  .dh-btn-sm {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: var(--dh-radius-sm);
+    border: 1px solid var(--dh-border);
+    background: var(--dh-surface-2);
+    color: var(--dh-text-muted);
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
 
-/* ── Members list ─────────────────────────────────────────── */
+    &:hover {
+      background: var(--dh-surface);
+      border-color: var(--dh-border-hover);
+      color: var(--dh-text);
+    }
 
-.dh-members-list {
-  border-top: 1px solid var(--dh-border);
-  background: var(--dh-bg);
-  padding: 4px 8px 6px 46px;
-}
+    &.dh-btn-red:hover {
+      background: var(--dh-red-bg);
+      border-color: var(--dh-red-border);
+      color: var(--dh-red);
+    }
+  }
 
-.dh-member-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 3px 0;
-  border-bottom: 1px solid var(--dh-border);
-}
-.dh-member-row:last-child {
-  border-bottom: none;
-}
+  .dh-btn-xs {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 6px;
+    border-radius: var(--dh-radius-sm);
+    border: 1px solid var(--dh-border);
+    background: transparent;
+    color: var(--dh-text-dim);
+    font-size: 10px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
 
-.dh-member-name {
-  font-size: 11px;
-  color: var(--dh-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+    &:hover {
+      background: var(--dh-surface-2);
+      color: var(--dh-text);
+    }
 
-.dh-leader-icon {
-  color: var(--dh-amber);
-  font-size: 10px;
-}
+    &.dh-btn-red:hover {
+      background: var(--dh-red-bg);
+      color: var(--dh-red);
+    }
+  }
 
-.dh-member-actions {
-  display: flex;
-  gap: 3px;
-  flex-shrink: 0;
-}
+  /* ── Members list ─────────────────────────────────────────── */
 
-/* ── Empty state ──────────────────────────────────────────── */
+  .dh-members-list {
+    border-top: 1px solid var(--dh-border);
+    background: var(--dh-bg);
+    padding: 4px 8px 6px 46px;
+  }
 
-.dh-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 40px 20px;
-  color: var(--dh-text-dim);
-}
-.dh-empty i {
-  font-size: 28px;
-}
-.dh-empty p {
-  font-size: 13px;
-  margin: 0;
+  .dh-member-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 3px 0;
+    border-bottom: 1px solid var(--dh-border);
+
+    &:last-child { border-bottom: none; }
+  }
+
+  .dh-member-name {
+    font-size: 11px;
+    color: var(--dh-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dh-leader-icon {
+    color: var(--dh-amber);
+    font-size: 10px;
+  }
+
+  .dh-member-actions {
+    display: flex;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+
+  /* ── Empty state ──────────────────────────────────────────── */
+
+  .dh-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 40px 20px;
+    color: var(--dh-text-dim);
+
+    i { font-size: 28px; }
+    p { font-size: 13px; margin: 0; }
+  }
 }

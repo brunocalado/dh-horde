@@ -2,48 +2,53 @@
   "id": "dh-horde",
   "title": "Daggerheart: Horde",
   "description": "Manage horde tokens: multiply and move.",
-  "version": "0.0.2",
-
+  "version": "0.0.3",
+  
   "compatibility": {
-    "minimum": 13,
-    "verified": 13,
-    "maximum": 13
+    "minimum": "14",
+    "verified": "14"
   },
-
   "relationships": {
     "systems": [
       {
         "id": "daggerheart",
         "type": "system",
         "compatibility": {
-          "minimum": "1.9.0"
+          "minimum": "2.3.4"
         }
       }
     ]
-  }, 
-
+  },
+  
   "authors": [
     {
-      "name": "Mestre Digital"
+      "name": "Mestre Digital",
+      "url": "https://www.youtube.com/@mestredigital",
+      "flags": {}
     }
   ],
-
+  
   "styles": [
     "styles/base.css",
     "styles/horde-hud.css",
     "styles/dashboard.css"
   ],
+  
   "esmodules": [
     "scripts/main.js"
   ],
-
-  "media": [{
-    "type": "setup",
-    "url": "modules/dh-horde/assets/images/thumbnail.webp",
-    "thumbnail": "modules/dh-horde/assets/images/thumbnail.webp"
-  }], 
-
+  "media": [
+    {
+      "type": "setup",
+      "url": "modules/dh-horde/assets/images/thumbnail.webp",
+      "thumbnail": "modules/dh-horde/assets/images/thumbnail.webp",
+      "loop": false,
+      "flags": {}
+    }
+  ],
+  
   "url": "https://github.com/brunocalado/dh-horde",
   "manifest": "https://raw.githubusercontent.com/brunocalado/dh-horde/main/module.json",
   "download": "https://codeload.github.com/brunocalado/dh-horde/zip/main"
+  
 }

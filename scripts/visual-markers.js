@@ -1,6 +1,5 @@
 import { Config } from './config.js';
-
-const MOD_ID = "dh-horde";
+import { MODULE_ID } from './constants.js';
 
 // Leader badge color (red) and member badge color (steel blue)
 const LEADER_COLOR = 0xaa0000;
@@ -44,7 +43,7 @@ export class VisualMarkers {
 
         // Refresh all markers when horde group settings change
         Hooks.on('updateSetting', (settingDoc) => {
-            if (settingDoc.key?.startsWith(`${MOD_ID}.`)) {
+            if (settingDoc.key?.startsWith(`${MODULE_ID}.`)) {
                 VisualMarkers._refreshAll();
             }
         });

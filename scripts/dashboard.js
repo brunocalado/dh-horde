@@ -1,3 +1,4 @@
+import { MODULE_ID } from './constants.js';
 import { Config } from './config.js';
 import { HordeManager } from './horde-manager.js';
 import { VisualMarkers } from './visual-markers.js';
@@ -19,7 +20,7 @@ export class Dashboard extends HandlebarsApplicationMixin(ApplicationV2) {
 
     static DEFAULT_OPTIONS = {
         id: "dh-horde-dashboard-window",
-        classes: ["dh-horde-dashboard-app"],
+        classes: [MODULE_ID, "dh-horde-dashboard-app"],
         window: {
             title: "Horde Dashboard",
             resizable: true

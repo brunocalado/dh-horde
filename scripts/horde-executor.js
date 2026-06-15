@@ -490,7 +490,7 @@ function simplifyPath(path) {
 }
 
 function snapPoint(x, y) {
-    const mode = CONST.GRID_SNAPPING_MODE?.TOP_LEFT_VERTEX ?? 0x10;
+    const mode = foundry.CONST.GRID_SNAPPING_MODE.TOP_LEFT_VERTEX;
     return canvas.grid.getSnappedPoint({ x, y }, { mode });
 }
 

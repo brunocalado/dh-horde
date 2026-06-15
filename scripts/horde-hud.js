@@ -1,3 +1,4 @@
+import { MODULE_ID } from './constants.js';
 import { Config } from './config.js';
 import { HordeManager } from './horde-manager.js';
 
@@ -14,7 +15,7 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 class HordeHudDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = {
         id: 'dh-horde-hud-dialog',
-        classes: ['dh-horde-hud-app'],
+        classes: [MODULE_ID, 'dh-horde-hud-app'],
         window: { title: 'Horde Actions' },
         position: { width: 280 },
         actions: {

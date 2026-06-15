@@ -45,33 +45,38 @@
 }
 
 /* =============================================================
-   Suppress Foundry window-chrome close on HUD dialog
+   Suppress Foundry window-chrome close on HUD dialog.
+   Compound selector: .dh-horde IS the root element, so we
+   target .window-header as a descendant, not a sibling.
    ============================================================= */
-#dh-horde-hud-dialog .window-header .header-button.close {
+.dh-horde.dh-horde-hud-app .window-header .header-button.close {
   display: none !important;
 }
 
 /* =============================================================
    Shared scrollbar styles
    ============================================================= */
-.dh-scroll {
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-.dh-scroll::-webkit-scrollbar           { width: 5px; }
-.dh-scroll::-webkit-scrollbar-track     { background: transparent; }
-.dh-scroll::-webkit-scrollbar-thumb     { background: var(--dh-surface-2); border-radius: 3px; }
-.dh-scroll::-webkit-scrollbar-thumb:hover { background: var(--dh-border-hover); }
+.dh-horde {
+  .dh-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
 
-/* =============================================================
-   Shared info-banner
-   ============================================================= */
-.dh-info-banner {
-  background: var(--dh-surface);
-  border-left: 2px solid var(--dh-blue);
-  border-radius: 0 var(--dh-radius-sm) var(--dh-radius-sm) 0;
-  padding: 8px 12px;
-  font-size: 12px;
-  color: var(--dh-text);
-  line-height: 1.55;
+    &::-webkit-scrollbar           { width: 5px; }
+    &::-webkit-scrollbar-track     { background: transparent; }
+    &::-webkit-scrollbar-thumb     { background: var(--dh-surface-2); border-radius: 3px; }
+    &::-webkit-scrollbar-thumb:hover { background: var(--dh-border-hover); }
+  }
+
+  /* =============================================================
+     Shared info-banner
+     ============================================================= */
+  .dh-info-banner {
+    background: var(--dh-surface);
+    border-left: 2px solid var(--dh-blue);
+    border-radius: 0 var(--dh-radius-sm) var(--dh-radius-sm) 0;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--dh-text);
+    line-height: 1.55;
+  }
 }

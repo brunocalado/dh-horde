@@ -1,4 +1,2 @@
-# Changelog
+# 0.0.3
 
-## [Fixed]
-- Dashboard scroll: groups now scroll within the window instead of overflowing beyond it

@@ -1,5 +1,5 @@
-const MOD_ID = "dh-horde";
-const MOD_PATH = `/modules/${MOD_ID}`;
+import { MODULE_ID } from './constants.js';
+
 const MOD_TITLE = "DH Horde";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -49,8 +49,6 @@ class HordeDashboardMenu extends foundry.applications.api.ApplicationV2 {
 // ─────────────────────────────────────────────────────────────────────────────
 export class Config {
     static data = {
-        modID: MOD_ID,
-        modPath: MOD_PATH,
         modTitle: MOD_TITLE
     };
 
@@ -64,7 +62,7 @@ export class Config {
     static init() {
 
         // ── Menu: Horde Dashboard ─────────────────────────────────────────
-        game.settings.registerMenu(MOD_ID, 'hordeDashboard', {
+        game.settings.registerMenu(MODULE_ID, 'hordeDashboard', {
             name: 'Horde Dashboard',
             label: 'Manage Hordes',
             hint: 'View and manage active horde groups.',
@@ -74,7 +72,7 @@ export class Config {
         });
 
         // ── Single array setting for all horde group data ─────────────────
-        game.settings.register(MOD_ID, 'groups', {
+        game.settings.register(MODULE_ID, 'groups', {
             name: 'Horde Groups',
             hint: 'Internal storage for horde group data.',
             scope: 'world',
@@ -94,10 +92,10 @@ export class Config {
      * @returns {object[]}
      */
     static getGroups() {
-        const raw = game.settings.get(MOD_ID, 'groups') ?? [];
+        const raw = game.settings.get(MODULE_ID, 'groups') ?? [];
         const cleaned = raw.filter(g => game.scenes.get(g.sceneId));
         if (cleaned.length !== raw.length) {
-            game.settings.set(MOD_ID, 'groups', cleaned);
+            game.settings.set(MODULE_ID, 'groups', cleaned);
         }
         return cleaned;
     }
@@ -108,7 +106,7 @@ export class Config {
      * @returns {Promise<void>}
      */
     static async saveGroups(groups) {
-        await game.settings.set(MOD_ID, 'groups', groups);
+        await game.settings.set(MODULE_ID, 'groups', groups);
     }
 
     /**
@@ -208,7 +206,7 @@ export class Config {
      * @returns {*}
      */
     static setting(key) {
-        return game.settings.get(MOD_ID, key);
+        return game.settings.get(MODULE_ID, key);
     }
 
     /**
@@ -218,7 +216,7 @@ export class Config {
      * @returns {Promise<void>}
      */
     static async modifySetting(key, newValue) {
-        await game.settings.set(MOD_ID, key, newValue);
+        await game.settings.set(MODULE_ID, key, newValue);
     }
 
     /**
