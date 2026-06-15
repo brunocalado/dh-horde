@@ -490,7 +490,9 @@ function simplifyPath(path) {
 }
 
 function snapPoint(x, y) {
-    const mode = foundry.CONST.GRID_SNAPPING_MODE.TOP_LEFT_VERTEX;
+    // GRID_SNAPPING_MODE was relocated in some V14 builds; fall back to the raw bitmask (1 = TOP_LEFT_VERTEX).
+    const snapModes = foundry.CONST.GRID_SNAPPING_MODE ?? foundry.grid?.BaseGrid?.SNAPPING_MODES;
+    const mode = snapModes?.TOP_LEFT_VERTEX ?? 1;
     return canvas.grid.getSnappedPoint({ x, y }, { mode });
 }
 
