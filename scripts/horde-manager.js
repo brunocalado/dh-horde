@@ -143,7 +143,7 @@ export class HordeManager {
 
     /**
      * Removes horde tokens when damage is taken (hitPoints.value increases).
-     * For each point of HP marked, `system.hordeHp` tokens are deleted.
+     * For each point of HP marked, `typeData.hordeHP` tokens are deleted.
      * Prioritises the token that received the damage first, then nearest tokens.
      *
      * Updates the group storage before deleting so the `deleteToken` hook
@@ -155,7 +155,7 @@ export class HordeManager {
      * @returns {Promise<void>}
      */
     static async _killTokensOnDamage(group, sourceTokenDoc, hpMarked) {
-        const hordeHp = sourceTokenDoc.actor?.system?.hordeHp;
+        const hordeHp = sourceTokenDoc.actor?.system?.typeData?.hordeHP;
         if (!hordeHp || hordeHp <= 0) return;
 
         const tokensToKill = hpMarked * hordeHp;
@@ -204,7 +204,7 @@ export class HordeManager {
 
     /**
      * Regenerates horde tokens when healing occurs (hitPoints.value decreases).
-     * For each point of HP unmarked, `system.hordeHp` tokens are spawned near
+     * For each point of HP unmarked, `typeData.hordeHP` tokens are spawned near
      * the leader, up to the maximum horde size (hordeHp * hitPoints.max).
      *
      * @param {object} group          - The horde group object
@@ -214,7 +214,7 @@ export class HordeManager {
      */
     static async _regenerateTokensOnHeal(group, sourceTokenDoc, hpHealed) {
         const actor   = sourceTokenDoc.actor;
-        const hordeHp = actor?.system?.hordeHp;
+        const hordeHp = actor?.system?.typeData?.hordeHP;
         if (!hordeHp || hordeHp <= 0) return;
 
         const maxHp       = actor.system?.resources?.hitPoints?.max;
@@ -252,8 +252,9 @@ export class HordeManager {
      * Before creating copies, ensures the origin token has actorLink: false
      * so all copies (which inherit baseData) are also unlinked from the actor.
      *
-     * Reads system.hordeHp and the current remaining HP from the actor,
-     * creates (hordeHp * remainingHp) copies in a spiral pattern, and forms a horde group.
+     * Reads typeData.hordeHP and the current remaining HP from the actor,
+     * creates copies in a spiral pattern so the group totals (hordeHp * remainingHp) tokens
+     * including the origin, and forms a horde group.
      * Remaining HP = hitPoints.max - hitPoints.value (inverted tracking: value increases with damage).
      * @param {Token} token - The original horde token
      * @returns {Promise<void>}
@@ -265,13 +266,13 @@ export class HordeManager {
             return;
         }
 
-        const hordeHp    = actor.system?.hordeHp;
+        const hordeHp    = actor.system?.typeData?.hordeHP;
         const maxHp      = actor.system?.resources?.hitPoints?.max;
         const currentHp  = actor.system?.resources?.hitPoints?.value ?? 0;
         const remaining  = maxHp - currentHp;
 
         if (!hordeHp || !maxHp) {
-            ui.notifications.warn(`[${Config.data.modTitle}] Token actor is missing hordeHp or hitPoints.max values.`);
+            ui.notifications.warn(`[${Config.data.modTitle}] Token actor is missing hordeHP or hitPoints.max values.`);
             return;
         }
 
@@ -287,11 +288,14 @@ export class HordeManager {
             await token.document.update({ actorLink: false });
         }
 
-        ui.notifications.info(`[${Config.data.modTitle}] Creating ${count} horde tokens...`);
+        // The origin token is one of the horde's members, so only count - 1 copies
+        // are needed; this keeps the initial size equal to the regeneration cap.
+        const copies = count - 1;
+        ui.notifications.info(`[${Config.data.modTitle}] Creating ${copies} horde tokens...`);
 
-        const newIds = await createHordeCopies(token, count);
+        const newIds = await createHordeCopies(token, copies);
 
-        if (newIds.length === 0) {
+        if (copies > 0 && newIds.length === 0) {
             ui.notifications.warn(`[${Config.data.modTitle}] Could not place any horde copies.`);
             return;
         }

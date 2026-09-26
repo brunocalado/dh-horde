@@ -1,3 +1,12 @@
+# 0.0.6
+
+- https://github.com/brunocalado/dh-horde/issues/3
+- Requires Daggerheart 2.10.5 or later. Earlier system versions are not supported.
+
+### Fixed
+- **Multiply** no longer fails with *"Token actor is missing hordeHp or hitPoints.max values"*. Daggerheart 2.10 moved the Horde HP field from `system.hordeHp` to the per-type submodel `system.typeData.hordeHP`, so the module was reading a value that no longer exists. Damage and healing were silently broken by the same change: marking HP no longer removed tokens and clearing HP no longer regenerated them. All three now read `system.typeData.hordeHP`.
+- **Multiply** now creates exactly `hordeHP × remaining HP` tokens, counting the origin token. Previously it created that many *copies* and then added the origin, so every horde started one token above its maximum size and its first heal was cut short by the regeneration cap. A horde worth a single token now forms a one-member group instead of warning *"Could not place any horde copies"*.
+
 # 0.0.5
 
 - https://github.com/brunocalado/dh-horde/issues/2

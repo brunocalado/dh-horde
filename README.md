@@ -4,8 +4,6 @@
 
 A standard horde token is a lie. It says "Giant Mosquitoes × 30" in the corner of a single token, and everyone at the table imagines something terrifying — but the map shows nothing. No sense of scale. No visual threat. When a player kills half of them, the token just gets a number edited. It feels like nothing.
 
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-Donate-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/mestredigital) [![More Modules](https://img.shields.io/badge/Foundry%20VTT-More%20Modules-red?style=for-the-badge&logo=gamepad)](https://mestredigital.online/pages/projetos-en)
-
 **DH Horde fixes that.**
 
 With one click, your single horde token **explodes into dozens of individual tokens** that spread across the battlefield. Players see the swarm. They feel surrounded. When their attacks land and tokens start disappearing, the map itself tells the story. That's what a horde is supposed to feel like.
@@ -14,6 +12,8 @@ With one click, your single horde token **explodes into dozens of individual tok
 ![Multiply](docs/horde1.gif)
 
 ![Move](docs/horde2.gif)
+
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-Donate-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/mestredigital) [![More Modules](https://img.shields.io/badge/Foundry%20VTT-More%20Modules-red?style=for-the-badge&logo=gamepad)](https://mestredigital.online/pages/projetos-en)
 
 ---
 
@@ -38,7 +38,7 @@ With one click, your single horde token **explodes into dozens of individual tok
 
 Your actor needs two fields filled in:
 
-- `system.hordeHp` — how many HP worth of creatures are in the horde
+- `system.typeData.hordeHP` — how many HP worth of creatures are in the horde
 - `system.resources.hitPoints.max` — the HP of each individual creature
 
 The module multiplies these two numbers to calculate how many tokens to create. A horde of 5 HP × 6 creatures = 30 tokens.
