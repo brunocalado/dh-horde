@@ -1,0 +1,64 @@
+{
+  "DHHORDE": {
+    "Settings": {
+      "Dashboard": {
+        "Name": "Tableau de bord des hordes",
+        "Label": "Gérer les hordes",
+        "Hint": "Afficher et gérer les groupes de hordes actifs."
+      },
+      "Groups": {
+        "Name": "Groupes de hordes",
+        "Hint": "Stockage interne des données des groupes de hordes."
+      }
+    },
+    "Common": {
+      "Unknown": "[inconnu]",
+      "None": "[aucun]",
+      "UnknownScene": "[scène inconnue]"
+    },
+    "Dashboard": {
+      "Title": "Tableau de bord des hordes",
+      "GMOnly": "Réservé au MJ.",
+      "Members": "Membres",
+      "Collapse": "Réduire",
+      "Dissolve": "Dissoudre",
+      "MemberCount": "{count} membres",
+      "PanToLeader": "Centrer sur le chef",
+      "PromoteToLeader": "Promouvoir chef",
+      "RemoveFromHorde": "Retirer de la horde",
+      "Empty": "Aucun groupe de horde actif.",
+      "LeaderNotFound": "Jeton du chef introuvable sur le canevas.",
+      "DissolveTitle": "Dissoudre la horde",
+      "DissolveConfirm": "Dissoudre la horde menée par <strong>{leader}</strong> ?<br>Tous les membres sauf le chef seront <strong>supprimés</strong> du canevas.",
+      "Promoted": "{name} promu chef de la horde."
+    },
+    "Hud": {
+      "Title": "Actions de horde",
+      "Tooltip": "Actions de horde",
+      "Horde": "Horde ({count} membres)",
+      "ReadyToMultiply": "Prêt à se multiplier",
+      "Multiply": "Multiplier la horde",
+      "MoveClose": "Déplacement court",
+      "MoveFar": "Déplacement long",
+      "MoveAll": "Déplacement maximal",
+      "TargetHint": "Ciblez un jeton pour activer le déplacement.",
+      "Dissolve": "Dissoudre la horde",
+      "Dashboard": "Tableau de bord"
+    },
+    "Manager": {
+      "Destroyed": "Horde détruite — {count} jeton(s) éliminé(s).",
+      "Dissolved": "Horde dissoute — {count} jeton(s) retiré(s), le chef reste.",
+      "NoActor": "Le jeton n'a pas d'acteur lié.",
+      "MissingStats": "L'acteur du jeton n'a pas de valeur hordeHP ou hitPoints.max.",
+      "CountInvalid": "Le nombre de membres calculé pour la horde est nul ou négatif.",
+      "Creating": "Création de {count} jetons de horde...",
+      "PlaceFailed": "Impossible de placer des copies de la horde.",
+      "Created": "Horde créée avec {count} jetons.",
+      "NotInGroup": "Le jeton ne fait pas partie d'un groupe de horde.",
+      "NoTarget": "Sélectionnez d'abord un jeton cible.",
+      "NoMembers": "Aucun membre de la horde trouvé sur le canevas.",
+      "GroupDestroyed": "Groupe de horde détruit — plus aucun membre.",
+      "Promoted": "{name} promu chef de la horde."
+    }
+  }
+}

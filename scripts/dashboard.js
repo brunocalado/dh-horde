@@ -22,7 +22,7 @@ export class Dashboard extends HandlebarsApplicationMixin(ApplicationV2) {
         id: "dh-horde-dashboard-window",
         classes: [MODULE_ID, "dh-horde-dashboard-app"],
         window: {
-            title: "Horde Dashboard",
+            title: "DHHORDE.Dashboard.Title",
             resizable: true
         },
         position: { width: 560, height: 400 },
@@ -52,7 +52,7 @@ export class Dashboard extends HandlebarsApplicationMixin(ApplicationV2) {
      */
     static async open() {
         if (!game.user.isGM) {
-            ui.notifications.warn(`[${Config.data.modTitle}] GM only.`);
+            ui.notifications.warn(`[${Config.data.modTitle}] ${game.i18n.localize("DHHORDE.Dashboard.GMOnly")}`);
             return;
         }
         if (!Dashboard.#instance) Dashboard.#instance = new Dashboard();
@@ -67,7 +67,7 @@ export class Dashboard extends HandlebarsApplicationMixin(ApplicationV2) {
         const groups = Config.getGroups().map((g, i) => {
             const groupIndex = i + 1;
             const leaderName = Config.resolveTokenName(g.sceneId, g.leaderId);
-            const sceneName = game.scenes.get(g.sceneId)?.name ?? '[unknown scene]';
+            const sceneName = game.scenes.get(g.sceneId)?.name ?? game.i18n.localize('DHHORDE.Common.UnknownScene');
             const members = g.memberIds.map(id => ({
                 id,
                 name: Config.resolveTokenName(g.sceneId, id),
@@ -98,11 +98,12 @@ export class Dashboard extends HandlebarsApplicationMixin(ApplicationV2) {
     _onRender(context, options) {
         super._onRender(context, options);
 
+        const collapseLabel = game.i18n.localize('DHHORDE.Dashboard.Collapse');
         for (const groupId of this.#expandedGroups) {
             const list = this.element.querySelector(`.dh-members-list[data-group-id="${groupId}"]`);
             const btn  = this.element.querySelector(`[data-action="expand"][data-group-id="${groupId}"]`);
             if (list) list.removeAttribute('hidden');
-            if (btn)  btn.innerHTML = '<i class="fas fa-users"></i> Collapse';
+            if (btn)  btn.innerHTML = `<i class="fas fa-users"></i> ${collapseLabel}`;
         }
     }
 
@@ -117,7 +118,7 @@ export class Dashboard extends HandlebarsApplicationMixin(ApplicationV2) {
 
         const token = canvas?.tokens?.get(group.leaderId);
         if (!token) {
-            ui.notifications.warn(`[${Config.data.modTitle}] Leader token not found on canvas.`);
+            ui.notifications.warn(`[${Config.data.modTitle}] ${game.i18n.localize("DHHORDE.Dashboard.LeaderNotFound")}`);
             return;
         }
         canvas.animatePan({ x: token.x, y: token.y, scale: Math.max(canvas.stage.scale.x, 1) });
@@ -133,11 +134,11 @@ export class Dashboard extends HandlebarsApplicationMixin(ApplicationV2) {
         const isHidden = memberList.hasAttribute('hidden');
         if (isHidden) {
             memberList.removeAttribute('hidden');
-            target.innerHTML = '<i class="fas fa-users"></i> Collapse';
+            target.innerHTML = `<i class="fas fa-users"></i> ${game.i18n.localize('DHHORDE.Dashboard.Collapse')}`;
             this.#expandedGroups.add(groupId);
         } else {
             memberList.setAttribute('hidden', '');
-            target.innerHTML = '<i class="fas fa-users"></i> Members';
+            target.innerHTML = `<i class="fas fa-users"></i> ${game.i18n.localize('DHHORDE.Dashboard.Members')}`;
             this.#expandedGroups.delete(groupId);
         }
     }
@@ -153,8 +154,8 @@ export class Dashboard extends HandlebarsApplicationMixin(ApplicationV2) {
 
         const leaderName = Config.resolveTokenName(group.sceneId, group.leaderId);
         const confirmed  = await foundry.applications.api.DialogV2.confirm({
-            window:  { title: 'Dissolve Horde' },
-            content: `<p>Dissolve the horde led by <strong>${leaderName}</strong>?<br>All members except the leader will be <strong>deleted</strong> from the canvas.</p>`
+            window:  { title: game.i18n.localize('DHHORDE.Dashboard.DissolveTitle') },
+            content: `<p>${game.i18n.format('DHHORDE.Dashboard.DissolveConfirm', { leader: foundry.utils.escapeHTML(leaderName) })}</p>`
         });
 
         if (!confirmed) return;
@@ -168,9 +169,7 @@ export class Dashboard extends HandlebarsApplicationMixin(ApplicationV2) {
         await Config.deleteGroup(groupId);
         VisualMarkers._refreshAll();
 
-        ui.notifications.info(
-            `[${Config.data.modTitle}] Horde dissolved — ${memberIdsToDelete.length} token(s) removed, leader remains.`
-        );
+        ui.notifications.info(`[${Config.data.modTitle}] ${game.i18n.format("DHHORDE.Manager.Dissolved", { count: memberIdsToDelete.length })}`);
         this.render(true);
     }
 
@@ -184,7 +183,7 @@ export class Dashboard extends HandlebarsApplicationMixin(ApplicationV2) {
         VisualMarkers._refreshAll();
 
         const newLeaderName = Config.resolveTokenName(group.sceneId, memberId);
-        ui.notifications.info(`[${Config.data.modTitle}] ${newLeaderName} promoted to horde leader.`);
+        ui.notifications.info(`[${Config.data.modTitle}] ${game.i18n.format("DHHORDE.Dashboard.Promoted", { name: newLeaderName })}`);
         this.render(true);
     }
 

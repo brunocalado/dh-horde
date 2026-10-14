@@ -63,9 +63,9 @@ export class Config {
 
         // ── Menu: Horde Dashboard ─────────────────────────────────────────
         game.settings.registerMenu(MODULE_ID, 'hordeDashboard', {
-            name: 'Horde Dashboard',
-            label: 'Manage Hordes',
-            hint: 'View and manage active horde groups.',
+            name: 'DHHORDE.Settings.Dashboard.Name',
+            label: 'DHHORDE.Settings.Dashboard.Label',
+            hint: 'DHHORDE.Settings.Dashboard.Hint',
             icon: 'fas fa-chess-rook',
             type: HordeDashboardMenu,
             restricted: true
@@ -73,8 +73,8 @@ export class Config {
 
         // ── Single array setting for all horde group data ─────────────────
         game.settings.register(MODULE_ID, 'groups', {
-            name: 'Horde Groups',
-            hint: 'Internal storage for horde group data.',
+            name: 'DHHORDE.Settings.Groups.Name',
+            hint: 'DHHORDE.Settings.Groups.Hint',
             scope: 'world',
             config: false,
             type: Array,
@@ -186,14 +186,14 @@ export class Config {
      * @returns {string}
      */
     static resolveTokenName(sceneId, tokenId) {
-        if (!tokenId) return '[none]';
+        if (!tokenId) return game.i18n.localize('DHHORDE.Common.None');
         if (canvas?.scene?.id === sceneId) {
             const liveToken = canvas.tokens.get(tokenId);
             if (liveToken) return liveToken.name;
         }
         const scene = game.scenes.get(sceneId);
         const tokenDoc = scene?.tokens?.get(tokenId);
-        return tokenDoc?.name ?? '[unknown]';
+        return tokenDoc?.name ?? game.i18n.localize('DHHORDE.Common.Unknown');
     }
 
     // ─────────────────────────────────────────────────────────────────────

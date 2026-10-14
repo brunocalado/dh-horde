@@ -1,0 +1,64 @@
+{
+  "DHHORDE": {
+    "Settings": {
+      "Dashboard": {
+        "Name": "Horde Dashboard",
+        "Label": "Manage Hordes",
+        "Hint": "View and manage active horde groups."
+      },
+      "Groups": {
+        "Name": "Horde Groups",
+        "Hint": "Internal storage for horde group data."
+      }
+    },
+    "Common": {
+      "Unknown": "[unknown]",
+      "None": "[none]",
+      "UnknownScene": "[unknown scene]"
+    },
+    "Dashboard": {
+      "Title": "Horde Dashboard",
+      "GMOnly": "GM only.",
+      "Members": "Members",
+      "Collapse": "Collapse",
+      "Dissolve": "Dissolve",
+      "MemberCount": "{count} members",
+      "PanToLeader": "Pan to leader",
+      "PromoteToLeader": "Promote to leader",
+      "RemoveFromHorde": "Remove from horde",
+      "Empty": "No active horde groups.",
+      "LeaderNotFound": "Leader token not found on canvas.",
+      "DissolveTitle": "Dissolve Horde",
+      "DissolveConfirm": "Dissolve the horde led by <strong>{leader}</strong>?<br>All members except the leader will be <strong>deleted</strong> from the canvas.",
+      "Promoted": "{name} promoted to horde leader."
+    },
+    "Hud": {
+      "Title": "Horde Actions",
+      "Tooltip": "Horde Actions",
+      "Horde": "Horde ({count} members)",
+      "ReadyToMultiply": "Ready to multiply",
+      "Multiply": "Multiply Horde",
+      "MoveClose": "Move Close",
+      "MoveFar": "Move Far",
+      "MoveAll": "Move All",
+      "TargetHint": "Target a token to enable movement.",
+      "Dissolve": "Dissolve Horde",
+      "Dashboard": "Dashboard"
+    },
+    "Manager": {
+      "Destroyed": "Horde destroyed — all {count} token(s) eliminated.",
+      "Dissolved": "Horde dissolved — {count} token(s) removed, leader remains.",
+      "NoActor": "Token has no linked actor.",
+      "MissingStats": "Token actor is missing hordeHP or hitPoints.max values.",
+      "CountInvalid": "Computed horde count is 0 or negative.",
+      "Creating": "Creating {count} horde tokens...",
+      "PlaceFailed": "Could not place any horde copies.",
+      "Created": "Horde created with {count} tokens.",
+      "NotInGroup": "Token is not part of a horde group.",
+      "NoTarget": "Select a target token first.",
+      "NoMembers": "No horde members found on canvas.",
+      "GroupDestroyed": "Horde group destroyed — no members remain.",
+      "Promoted": "{name} promoted to horde leader."
+    }
+  }
+}

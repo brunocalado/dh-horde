@@ -16,7 +16,7 @@ class HordeHudDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = {
         id: 'dh-horde-hud-dialog',
         classes: [MODULE_ID, 'dh-horde-hud-app'],
-        window: { title: 'Horde Actions' },
+        window: { title: 'DHHORDE.Hud.Title' },
         position: { width: 280 },
         actions: {
             multiply:         HordeHudDialog.#onMultiply,
@@ -124,7 +124,7 @@ export class HordeHud {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.classList.add('control-icon', 'dh-horde-hud-btn');
-        btn.setAttribute('data-tooltip', 'Horde Actions');
+        btn.setAttribute('data-tooltip', game.i18n.localize('DHHORDE.Hud.Tooltip'));
         btn.innerHTML = '<i class="fas fa-chess-rook"></i>';
 
         btn.addEventListener('click', async (ev) => {
