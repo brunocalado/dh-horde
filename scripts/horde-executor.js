@@ -38,21 +38,28 @@ const FAR_MOVE_UNITS   = 60;
  * one at a time with a short SPAWN_INTERVAL stagger so the expansion is
  * clearly visible rather than appearing all at once.
  *
- * Returns the IDs of all created tokens once the last one has finished moving.
+ * Resolves as soon as every token document exists; the crawl animations are
+ * returned separately so a caller holding the horde queue never waits on them.
+ * Copies are created one at a time (not in one batch) to keep the staggered
+ * "horde expanding" spawn; the queue is held only for the creation itself.
  *
  * @param {Token} originToken
  * @param {number} count
- * @param {Set<string>} [excludeIds=new Set()] - Token IDs to ignore during
+ * @param {object} [options]
+ * @param {Set<string>} [options.excludeIds] - Token IDs to ignore during
  *        occupation checks (e.g. existing horde members during regeneration)
- * @returns {Promise<string[]>}
+ * @param {object} [options.overrides] - Merged into each copy's token data,
+ *        e.g. the horde's current HP as a delta
+ * @returns {Promise<{ ids: string[], animations: Promise<void> }>}
  */
-export async function createHordeCopies(originToken, count, excludeIds = new Set()) {
-    if (!canvas.ready || count <= 0) return [];
+export async function createHordeCopies(originToken, count, { excludeIds = new Set(), overrides = {} } = {}) {
+    const none = { ids: [], animations: Promise.resolve() };
+    if (!canvas.ready || count <= 0) return none;
 
     const scene   = canvas.scene;
     const lattice = createLattice(originToken);
 
-    const baseData = originToken.document.toObject();
+    const baseData = foundry.utils.mergeObject(originToken.document.toObject(), overrides, { inplace: false });
     delete baseData._id;
 
     const { w: lw, h: lh } = getTokenSizeInCells(originToken);
@@ -94,7 +101,7 @@ export async function createHordeCopies(originToken, count, excludeIds = new Set
         destCells.push(snapped);
     }
 
-    if (destCells.length === 0) return [];
+    if (destCells.length === 0) return none;
 
     // ── Phase 2: Spawn + animate each copy sequentially with SPAWN_INTERVAL stagger ──
     const createdIds   = [];
@@ -126,10 +133,7 @@ export async function createHordeCopies(originToken, count, excludeIds = new Set
         }
     }
 
-    // Wait for all crawl animations to finish before returning
-    await Promise.all(movePromises);
-
-    return createdIds;
+    return { ids: createdIds, animations: Promise.all(movePromises).then(() => {}) };
 }
 
 /**

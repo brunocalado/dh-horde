@@ -10,7 +10,8 @@ import { createHordeCopies, moveHordeTowardTarget } from './horde-executor.js';
 // Every change to a group or to its member tokens runs as a task in one serial
 // queue. Concurrent tasks used to overwrite the shared 'groups' setting and
 // leave members with different HP; serialising them, and re-reading the group
-// at the start of each task, is what keeps the horde consistent.
+// at the start of each task, is what keeps the horde consistent. It is one queue
+// rather than one per group because every group lives in the same setting array.
 // ─────────────────────────────────────────────────────────────────────────────
 
 let queue = Promise.resolve();
@@ -71,6 +72,9 @@ export class HordeManager {
      * When hitPoints.value reaches hitPoints.max the entire horde is destroyed.
      *
      * A report equal to the group's value is already applied and ignored.
+     * Known gap: Daggerheart computes each new HP from the hit token's own value,
+     * so a second, separate hit landing before propagation reaches that token
+     * reports a stale total and one of the two hits is lost.
      *
      * @param {string} groupId
      * @param {string} sourceTokenId - Member whose actor reported the change
@@ -135,15 +139,23 @@ export class HordeManager {
             const resources = scene.tokens.get(id)?.actor?.system?.resources;
             if (!resources) continue;
             if (resources.hitPoints?.value === group.hp && resources.stress?.value === group.stress) continue;
-            updates.push({
-                _id: id,
-                delta: { system: { resources: {
-                    hitPoints: { value: group.hp },
-                    stress:    { value: group.stress }
-                } } }
-            });
+            updates.push({ _id: id, ...HordeManager.#statsDelta(group) });
         }
         if (updates.length) await scene.updateEmbeddedDocuments('Token', updates);
+    }
+
+    /**
+     * Token data that sets a member's hp and stress to the group's values.
+     * @param {object} group
+     * @returns {object}
+     */
+    static #statsDelta(group) {
+        return {
+            delta: { system: { resources: {
+                hitPoints: { value: group.hp },
+                stress:    { value: group.stress }
+            } } }
+        };
     }
 
     /**
@@ -258,15 +270,18 @@ export class HordeManager {
             ?? group.memberIds.map(id => canvas.tokens.get(id)).find(Boolean);
         if (!refToken) return;
 
-        // Pass existing member IDs so the spiral skips occupied cells
-        // instead of treating them as blocked
-        const excludeIds = new Set(group.memberIds);
-        const newIds = await createHordeCopies(refToken, tokensToAdd, excludeIds);
+        // Pass existing member IDs so the spiral skips occupied cells instead of
+        // treating them as blocked. Copies are born with the horde's values and
+        // join the group before this task ends, so no later task can miss them;
+        // their crawl animations run on without holding the queue.
+        const { ids, animations } = await createHordeCopies(refToken, tokensToAdd, {
+            excludeIds: new Set(group.memberIds),
+            overrides: HordeManager.#statsDelta(group)
+        });
+        animations.catch(err => console.error(`${MODULE_ID} |`, err));
 
-        if (newIds.length > 0) {
-            const current = Config.getGroup(group.id);
-            if (!current) return;
-            await Config.updateGroup(group.id, { memberIds: [...current.memberIds, ...newIds] });
+        if (ids.length > 0) {
+            await Config.updateGroup(group.id, { memberIds: [...group.memberIds, ...ids] });
             VisualMarkers._refreshAll();
         }
     }
@@ -320,7 +335,8 @@ export class HordeManager {
             const copies = count - 1;
             ui.notifications.info(`[${Config.data.modTitle}] Creating ${copies} horde tokens...`);
 
-            const newIds = await createHordeCopies(token, copies);
+            const { ids: newIds, animations } = await createHordeCopies(token, copies);
+            animations.catch(err => console.error(`${MODULE_ID} |`, err));
 
             if (copies > 0 && newIds.length === 0) {
                 ui.notifications.warn(`[${Config.data.modTitle}] Could not place any horde copies.`);
