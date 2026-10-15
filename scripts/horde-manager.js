@@ -1,123 +1,149 @@
+import { MODULE_ID } from './constants.js';
 import { Config } from './config.js';
 import { VisualMarkers } from './visual-markers.js';
 import { createHordeCopies, moveHordeTowardTarget } from './horde-executor.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HordeManager — Business logic for horde multiplication, movement, and
-//                automatic leader promotion on token death/deletion.
+// HordeManager — Business logic for horde multiplication, movement, stat
+//                sync, and automatic leader promotion on token death/deletion.
+//
+// Every change to a group or to its member tokens runs as a task in one serial
+// queue. Concurrent tasks used to overwrite the shared 'groups' setting and
+// leave members with different HP; serialising them, and re-reading the group
+// at the start of each task, is what keeps the horde consistent.
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Prevents re-entrant sync loops when propagating stat changes.
-let _syncingHorde = false;
+let queue = Promise.resolve();
 
 export class HordeManager {
 
     /**
-     * Registers auto-promotion hooks for leader death/deletion,
-     * and stat synchronisation (hp / stress) across all horde members.
+     * Runs `task` after every previously enqueued task. A failing task is logged
+     * and never blocks the ones after it.
+     * @param {() => Promise<any>} task
+     * @returns {Promise<any>} Settles with the task's own result
+     */
+    static enqueue(task) {
+        const run = queue.then(task);
+        queue = run.catch(err => console.error(`${MODULE_ID} |`, err));
+        return run;
+    }
+
+    /** Only the active GM reacts to document events, so two connected GMs never both act. */
+    static get #isRunner() {
+        return game.users.activeGM?.isSelf ?? false;
+    }
+
+    /**
+     * Registers the member-loss and stat-sync hooks.
      * Called during the Foundry 'ready' hook.
      */
     static init() {
-        // When a token is deleted, remove it from its horde group and promote if needed
-        Hooks.on('deleteToken', (tokenDoc, _options, _userId) => {
-            if (!game.user.isGM) return;
+        Hooks.on('deleteToken', (tokenDoc) => {
+            if (!HordeManager.#isRunner) return;
             const group = Config.getGroupByTokenId(tokenDoc.id);
-            if (group) HordeManager._handleMemberLost(group, tokenDoc.id);
+            if (group) HordeManager.enqueue(() => HordeManager.#handleMemberLost(group.id, tokenDoc.id));
         });
 
-        // Shared updateActor handler: stat sync and horde size management.
-        Hooks.on('updateActor', (actorDoc, diff, _options, _userId) => {
-            if (!game.user.isGM) return;
+        // Propagation writes member tokens' delta through Token updates, which
+        // fire updateToken but not updateActor, so this only ever sees changes
+        // made to a member's actor from outside the module.
+        Hooks.on('updateActor', (actorDoc, diff) => {
+            if (!HordeManager.#isRunner) return;
+            const hp     = diff.system?.resources?.hitPoints?.value;
+            const stress = diff.system?.resources?.stress?.value;
+            if (hp === undefined && stress === undefined) return;
 
-            // Skip if we are the ones triggering the propagation
-            if (!_syncingHorde) {
-                HordeManager._syncStatToGroup(actorDoc, diff);
-            }
+            // Unlinked copies share one base actor, so the synthetic actor's
+            // token is the only way to tell which member changed.
+            const tokenId = actorDoc.token?.id;
+            const group   = Config.getGroupByTokenId(tokenId);
+            if (!group) return;
+            HordeManager.enqueue(() => HordeManager.#reconcile(group.id, tokenId, { hp, stress }));
         });
     }
 
     /**
-     * Propagates hitPoints.value and/or stress.value changes from one horde
-     * member's actor to all other members in the same group.
+     * Applies a member's reported hp / stress to the whole horde.
      *
      * In this system, hitPoints.value increasing = taking damage (tokens die),
      * hitPoints.value decreasing = healing (tokens regenerate).
      * When hitPoints.value reaches hitPoints.max the entire horde is destroyed.
      *
-     * Only fires when the changed actor belongs to a horde group. Uses
-     * `_syncingHorde` to break the re-entrant update loop.
+     * A report equal to the group's value is already applied and ignored.
      *
-     * @param {Actor} actorDoc - The actor that just changed
-     * @param {object} diff    - The update diff object
+     * @param {string} groupId
+     * @param {string} sourceTokenId - Member whose actor reported the change
+     * @param {{hp?: number, stress?: number}} reported
+     * @returns {Promise<void>}
      */
-    static async _syncStatToGroup(actorDoc, diff) {
-        const hp     = diff.system?.resources?.hitPoints?.value;
-        const stress = diff.system?.resources?.stress?.value;
-
-        // Nothing to sync
-        if (hp === undefined && stress === undefined) return;
-
-        // For unlinked tokens, actorDoc.token references the owning TokenDocument.
-        // This is the only reliable way to identify the source token since all
-        // unlinked copies share the same base actorId.
-        const sourceTokenDoc = actorDoc.token;
-        if (!sourceTokenDoc) return;
-
-        const group = Config.getGroupByTokenId(sourceTokenDoc.id);
+    static async #reconcile(groupId, sourceTokenId, { hp, stress }) {
+        const group = Config.getGroup(groupId);
         if (!group) return;
 
-        // Capture old HP from a sibling member before syncing, so we can
-        // calculate the HP delta for the token-kill / regenerate feature.
-        let oldHp = null;
-        if (hp !== undefined) {
-            for (const memberId of group.memberIds) {
-                if (memberId === sourceTokenDoc.id) continue;
-                const siblingDoc = canvas.scene?.tokens?.get(memberId);
-                if (siblingDoc?.actor) {
-                    oldHp = siblingDoc.actor.system?.resources?.hitPoints?.value;
-                    break;
-                }
-            }
+        const change = {};
+        if (hp     !== undefined && hp     !== group.hp)     change.hp     = hp;
+        if (stress !== undefined && stress !== group.stress) change.stress = stress;
+        if (Object.keys(change).length === 0) return;
+
+        const actor = HordeManager.#referenceActor(group, sourceTokenId);
+        const maxHp = actor?.system?.resources?.hitPoints?.max;
+
+        if (change.hp !== undefined && maxHp && change.hp >= maxHp) {
+            await HordeManager.#destroyEntireHorde(group);
+            return;
         }
 
-        // Build the update payload
-        const updateData = {};
-        if (hp     !== undefined) updateData['system.resources.hitPoints.value'] = hp;
-        if (stress !== undefined) updateData['system.resources.stress.value']    = stress;
+        const hpDelta = (change.hp ?? group.hp) - group.hp;
+        await Config.updateGroup(groupId, change);
+        await HordeManager.#propagate(Config.getGroup(groupId));
 
-        _syncingHorde = true;
-        try {
-            // Update every other member's synthetic actor via tokenDoc.actor,
-            // which targets the unlinked token's own ActorDelta — not the base actor.
-            const updates = [];
-            for (const memberId of group.memberIds) {
-                if (memberId === sourceTokenDoc.id) continue;
-                const tokenDoc = canvas.scene?.tokens?.get(memberId);
-                if (!tokenDoc?.actor) continue;
-                updates.push(tokenDoc.actor.update(updateData));
-            }
-            await Promise.all(updates);
-        } finally {
-            _syncingHorde = false;
+        if (hpDelta > 0) {
+            await HordeManager.#killTokensOnDamage(Config.getGroup(groupId), sourceTokenId, hpDelta);
+        } else if (hpDelta < 0) {
+            await HordeManager.#regenerateTokensOnHeal(Config.getGroup(groupId), -hpDelta);
         }
+    }
 
-        // Adjust horde size based on HP change direction
-        if (hp !== undefined && oldHp !== null) {
-            const maxHp = sourceTokenDoc.actor?.system?.resources?.hitPoints?.max;
+    /**
+     * The actor whose stat block describes the horde: the reporting member if it
+     * still exists, otherwise the leader or any member.
+     * @param {object} group
+     * @param {string} [preferredTokenId]
+     * @returns {Actor|null}
+     */
+    static #referenceActor(group, preferredTokenId) {
+        const tokens = game.scenes.get(group.sceneId)?.tokens;
+        return tokens?.get(preferredTokenId)?.actor
+            ?? tokens?.get(group.leaderId)?.actor
+            ?? group.memberIds.map(id => tokens?.get(id)?.actor).find(Boolean)
+            ?? null;
+    }
 
-            // HP reached max — total horde wipe
-            if (hp >= maxHp) {
-                await HordeManager._destroyEntireHorde(group);
-            }
-            // HP increased — damage taken, kill tokens
-            else if (hp > oldHp) {
-                await HordeManager._killTokensOnDamage(group, sourceTokenDoc, hp - oldHp);
-            }
-            // HP decreased — healing, regenerate tokens
-            else if (hp < oldHp) {
-                await HordeManager._regenerateTokensOnHeal(group, sourceTokenDoc, oldHp - hp);
-            }
+    /**
+     * Writes the group's hp and stress into every member that differs, in one
+     * batched update of the members' ActorDelta.
+     * @param {object} group
+     * @returns {Promise<void>}
+     */
+    static async #propagate(group) {
+        const scene = game.scenes.get(group.sceneId);
+        if (!scene) return;
+
+        const updates = [];
+        for (const id of group.memberIds) {
+            const resources = scene.tokens.get(id)?.actor?.system?.resources;
+            if (!resources) continue;
+            if (resources.hitPoints?.value === group.hp && resources.stress?.value === group.stress) continue;
+            updates.push({
+                _id: id,
+                delta: { system: { resources: {
+                    hitPoints: { value: group.hp },
+                    stress:    { value: group.stress }
+                } } }
+            });
         }
+        if (updates.length) await scene.updateEmbeddedDocuments('Token', updates);
     }
 
     /**
@@ -127,14 +153,16 @@ export class HordeManager {
      * @param {object} group - The horde group object
      * @returns {Promise<void>}
      */
-    static async _destroyEntireHorde(group) {
+    static async #destroyEntireHorde(group) {
         const allIds = [...group.memberIds];
 
         // Remove group first so deleteToken hooks skip these tokens
         await Config.deleteGroup(group.id);
 
-        if (allIds.length > 0) {
-            await canvas.scene.deleteEmbeddedDocuments('Token', allIds);
+        const scene = game.scenes.get(group.sceneId);
+        const existing = allIds.filter(id => scene?.tokens.has(id));
+        if (existing.length > 0) {
+            await scene.deleteEmbeddedDocuments('Token', existing);
         }
 
         VisualMarkers._refreshAll();
@@ -147,34 +175,34 @@ export class HordeManager {
      * Prioritises the token that received the damage first, then nearest tokens.
      *
      * Updates the group storage before deleting so the `deleteToken` hook
-     * does not trigger redundant `_handleMemberLost` calls.
+     * finds nothing left to do.
      *
      * @param {object} group          - The horde group object
-     * @param {TokenDocument} sourceTokenDoc - Token that received the HP change
+     * @param {string} sourceTokenId  - Token that received the HP change
      * @param {number} hpMarked       - Positive number of HP points marked (damage)
      * @returns {Promise<void>}
      */
-    static async _killTokensOnDamage(group, sourceTokenDoc, hpMarked) {
-        const hordeHp = sourceTokenDoc.actor?.system?.typeData?.hordeHP;
+    static async #killTokensOnDamage(group, sourceTokenId, hpMarked) {
+        const hordeHp = HordeManager.#referenceActor(group, sourceTokenId)?.system?.typeData?.hordeHP;
         if (!hordeHp || hordeHp <= 0) return;
 
         const tokensToKill = hpMarked * hordeHp;
         if (tokensToKill <= 0) return;
-
-        const sourceToken = canvas.tokens.get(sourceTokenDoc.id);
-        if (!sourceToken) return;
 
         // Build candidate list from current group members
         const candidates = group.memberIds
             .map(id => canvas.tokens.get(id))
             .filter(Boolean);
 
+        const origin = canvas.tokens.get(sourceTokenId) ?? canvas.tokens.get(group.leaderId) ?? candidates[0];
+        if (!origin) return;
+
         // Sort: source token first (it took the hit), then by proximity to source
         candidates.sort((a, b) => {
-            if (a.id === sourceTokenDoc.id) return -1;
-            if (b.id === sourceTokenDoc.id) return 1;
-            const distA = Math.hypot(a.center.x - sourceToken.center.x, a.center.y - sourceToken.center.y);
-            const distB = Math.hypot(b.center.x - sourceToken.center.x, b.center.y - sourceToken.center.y);
+            if (a.id === sourceTokenId) return -1;
+            if (b.id === sourceTokenId) return 1;
+            const distA = Math.hypot(a.center.x - origin.center.x, a.center.y - origin.center.y);
+            const distB = Math.hypot(b.center.x - origin.center.x, b.center.y - origin.center.y);
             return distA - distB;
         });
 
@@ -208,12 +236,11 @@ export class HordeManager {
      * the leader, up to the maximum horde size (hordeHp * hitPoints.max).
      *
      * @param {object} group          - The horde group object
-     * @param {TokenDocument} sourceTokenDoc - Token that received the HP change
      * @param {number} hpHealed       - Positive number of HP points unmarked (healed)
      * @returns {Promise<void>}
      */
-    static async _regenerateTokensOnHeal(group, sourceTokenDoc, hpHealed) {
-        const actor   = sourceTokenDoc.actor;
+    static async #regenerateTokensOnHeal(group, hpHealed) {
+        const actor   = HordeManager.#referenceActor(group, group.leaderId);
         const hordeHp = actor?.system?.typeData?.hordeHP;
         if (!hordeHp || hordeHp <= 0) return;
 
@@ -227,11 +254,8 @@ export class HordeManager {
         if (tokensToAdd <= 0) return;
 
         // Use the leader (or any surviving member) as the reference for cloning
-        const refTokenDoc = canvas.scene?.tokens?.get(group.leaderId)
-            ?? canvas.scene?.tokens?.get(group.memberIds[0]);
-        if (!refTokenDoc) return;
-
-        const refToken = canvas.tokens.get(refTokenDoc.id);
+        const refToken = canvas.tokens.get(group.leaderId)
+            ?? group.memberIds.map(id => canvas.tokens.get(id)).find(Boolean);
         if (!refToken) return;
 
         // Pass existing member IDs so the spiral skips occupied cells
@@ -240,8 +264,9 @@ export class HordeManager {
         const newIds = await createHordeCopies(refToken, tokensToAdd, excludeIds);
 
         if (newIds.length > 0) {
-            const updatedMembers = [...group.memberIds, ...newIds];
-            await Config.updateGroup(group.id, { memberIds: updatedMembers });
+            const current = Config.getGroup(group.id);
+            if (!current) return;
+            await Config.updateGroup(group.id, { memberIds: [...current.memberIds, ...newIds] });
             VisualMarkers._refreshAll();
         }
     }
@@ -259,56 +284,61 @@ export class HordeManager {
      * @param {Token} token - The original horde token
      * @returns {Promise<void>}
      */
-    static async multiplyHorde(token) {
-        const actor = token.actor;
-        if (!actor) {
-            ui.notifications.warn(`[${Config.data.modTitle}] Token has no linked actor.`);
-            return;
-        }
+    static multiplyHorde(token) {
+        return HordeManager.enqueue(async () => {
+            const actor = token.actor;
+            if (!actor) {
+                ui.notifications.warn(`[${Config.data.modTitle}] Token has no linked actor.`);
+                return;
+            }
 
-        const hordeHp    = actor.system?.typeData?.hordeHP;
-        const maxHp      = actor.system?.resources?.hitPoints?.max;
-        const currentHp  = actor.system?.resources?.hitPoints?.value ?? 0;
-        const remaining  = maxHp - currentHp;
+            const hordeHp    = actor.system?.typeData?.hordeHP;
+            const maxHp      = actor.system?.resources?.hitPoints?.max;
+            const currentHp  = actor.system?.resources?.hitPoints?.value ?? 0;
+            const stress     = actor.system?.resources?.stress?.value ?? 0;
+            const remaining  = maxHp - currentHp;
 
-        if (!hordeHp || !maxHp) {
-            ui.notifications.warn(`[${Config.data.modTitle}] Token actor is missing hordeHP or hitPoints.max values.`);
-            return;
-        }
+            if (!hordeHp || !maxHp) {
+                ui.notifications.warn(`[${Config.data.modTitle}] Token actor is missing hordeHP or hitPoints.max values.`);
+                return;
+            }
 
-        const count = hordeHp * remaining;
-        if (count <= 0) {
-            ui.notifications.warn(`[${Config.data.modTitle}] Computed horde count is 0 or negative.`);
-            return;
-        }
+            const count = hordeHp * remaining;
+            if (count <= 0) {
+                ui.notifications.warn(`[${Config.data.modTitle}] Computed horde count is 0 or negative.`);
+                return;
+            }
 
-        // Unlink the origin token from its actor before multiplying so all
-        // copies (which clone baseData) are also unlinked.
-        if (token.document.actorLink !== false) {
-            await token.document.update({ actorLink: false });
-        }
+            // Unlink the origin token from its actor before multiplying so all
+            // copies (which clone baseData) are also unlinked.
+            if (token.document.actorLink !== false) {
+                await token.document.update({ actorLink: false });
+            }
 
-        // The origin token is one of the horde's members, so only count - 1 copies
-        // are needed; this keeps the initial size equal to the regeneration cap.
-        const copies = count - 1;
-        ui.notifications.info(`[${Config.data.modTitle}] Creating ${copies} horde tokens...`);
+            // The origin token is one of the horde's members, so only count - 1 copies
+            // are needed; this keeps the initial size equal to the regeneration cap.
+            const copies = count - 1;
+            ui.notifications.info(`[${Config.data.modTitle}] Creating ${copies} horde tokens...`);
 
-        const newIds = await createHordeCopies(token, copies);
+            const newIds = await createHordeCopies(token, copies);
 
-        if (copies > 0 && newIds.length === 0) {
-            ui.notifications.warn(`[${Config.data.modTitle}] Could not place any horde copies.`);
-            return;
-        }
+            if (copies > 0 && newIds.length === 0) {
+                ui.notifications.warn(`[${Config.data.modTitle}] Could not place any horde copies.`);
+                return;
+            }
 
-        const allMemberIds = [token.id, ...newIds];
-        await Config.createGroup({
-            sceneId: canvas.scene.id,
-            leaderId: token.id,
-            memberIds: allMemberIds
+            const allMemberIds = [token.id, ...newIds];
+            await Config.createGroup({
+                sceneId: token.document.parent.id,
+                leaderId: token.id,
+                memberIds: allMemberIds,
+                hp: currentHp,
+                stress
+            });
+
+            VisualMarkers._refreshAll();
+            ui.notifications.info(`[${Config.data.modTitle}] Horde created with ${allMemberIds.length} tokens.`);
         });
-
-        VisualMarkers._refreshAll();
-        ui.notifications.info(`[${Config.data.modTitle}] Horde created with ${allMemberIds.length} tokens.`);
     }
 
     /**
@@ -345,6 +375,33 @@ export class HordeManager {
     /**
      * Dissolves a horde group: deletes all member tokens except the leader,
      * then removes the group from storage. The leader token remains on the canvas.
+     * @param {string} groupId
+     * @returns {Promise<number|null>} Number of tokens removed, or null if the group is gone
+     */
+    static dissolveGroup(groupId) {
+        return HordeManager.enqueue(async () => {
+            const group = Config.getGroup(groupId);
+            if (!group) return null;
+
+            // Remove the group first so the deleteToken hooks find nothing to do.
+            await Config.deleteGroup(group.id);
+
+            const scene = game.scenes.get(group.sceneId);
+            const memberIdsToDelete = group.memberIds.filter(id => id !== group.leaderId && scene?.tokens.has(id));
+            if (memberIdsToDelete.length > 0) {
+                await scene.deleteEmbeddedDocuments('Token', memberIdsToDelete);
+            }
+
+            VisualMarkers._refreshAll();
+            ui.notifications.info(
+                `[${Config.data.modTitle}] Horde dissolved — ${memberIdsToDelete.length} token(s) removed, leader remains.`
+            );
+            return memberIdsToDelete.length;
+        });
+    }
+
+    /**
+     * Dissolves the horde group a token belongs to.
      * @param {Token} token - Any token belonging to the horde group
      * @returns {Promise<void>}
      */
@@ -354,37 +411,59 @@ export class HordeManager {
             ui.notifications.warn(`[${Config.data.modTitle}] Token is not part of a horde group.`);
             return;
         }
-
-        const memberIdsToDelete = group.memberIds.filter(id => id !== group.leaderId);
-
-        if (memberIdsToDelete.length > 0) {
-            await canvas.scene.deleteEmbeddedDocuments('Token', memberIdsToDelete);
-        }
-
-        await Config.deleteGroup(group.id);
-        VisualMarkers._refreshAll();
-
-        ui.notifications.info(
-            `[${Config.data.modTitle}] Horde dissolved — ${memberIdsToDelete.length} token(s) removed, leader remains.`
-        );
+        await HordeManager.dissolveGroup(group.id);
     }
 
     /**
-     * Handles a horde member being lost (deleted or killed).
-     * Removes the member from the group, promotes a new leader if needed,
-     * or destroys the group if no members remain.
-     * @param {object} group - The horde group object
-     * @param {string} lostTokenId - ID of the lost token
+     * Makes a member the group's leader.
+     * @param {string} groupId
+     * @param {string} memberId
      * @returns {Promise<void>}
      */
-    static async _handleMemberLost(group, lostTokenId) {
+    static promoteLeader(groupId, memberId) {
+        return HordeManager.enqueue(async () => {
+            const group = Config.getGroup(groupId);
+            if (!group?.memberIds.includes(memberId)) return;
+            await Config.updateGroup(groupId, { leaderId: memberId });
+            VisualMarkers._refreshAll();
+            const leaderName = Config.resolveTokenName(group.sceneId, memberId);
+            ui.notifications.info(`[${Config.data.modTitle}] ${leaderName} promoted to horde leader.`);
+        });
+    }
+
+    /**
+     * Removes a member from its group without deleting the token.
+     * @param {string} groupId
+     * @param {string} memberId
+     * @returns {Promise<void>}
+     */
+    static removeMember(groupId, memberId) {
+        return HordeManager.enqueue(async () => {
+            await HordeManager.#handleMemberLost(groupId, memberId, { quiet: true });
+            VisualMarkers._refreshAll();
+        });
+    }
+
+    /**
+     * Handles a horde member being lost (deleted, killed, or removed).
+     * Removes the member from the group, promotes a new leader if needed,
+     * or destroys the group if no members remain.
+     * @param {string} groupId
+     * @param {string} lostTokenId - ID of the lost token
+     * @param {{quiet?: boolean}} [options] - Skip the notifications
+     * @returns {Promise<void>}
+     */
+    static async #handleMemberLost(groupId, lostTokenId, { quiet = false } = {}) {
+        const group = Config.getGroup(groupId);
+        if (!group?.memberIds.includes(lostTokenId)) return;
+
         const updatedMemberIds = group.memberIds.filter(id => id !== lostTokenId);
 
         // No members left — destroy the group entirely
         if (updatedMemberIds.length === 0) {
             await Config.deleteGroup(group.id);
             VisualMarkers._refreshAll();
-            ui.notifications.info(`[${Config.data.modTitle}] Horde group destroyed — no members remain.`);
+            if (!quiet) ui.notifications.info(`[${Config.data.modTitle}] Horde group destroyed — no members remain.`);
             return;
         }
 
@@ -395,9 +474,11 @@ export class HordeManager {
                 leaderId: newLeaderId,
                 memberIds: updatedMemberIds
             });
-            const leaderName = Config.resolveTokenName(group.sceneId, newLeaderId);
             VisualMarkers._refreshAll();
-            ui.notifications.info(`[${Config.data.modTitle}] ${leaderName} promoted to horde leader.`);
+            if (!quiet) {
+                const leaderName = Config.resolveTokenName(group.sceneId, newLeaderId);
+                ui.notifications.info(`[${Config.data.modTitle}] ${leaderName} promoted to horde leader.`);
+            }
             return;
         }
 

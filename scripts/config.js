@@ -18,7 +18,11 @@ class HordeGroupDataModel extends foundry.abstract.DataModel {
             id:        new fields.StringField({ required: true, blank: false }),
             sceneId:   new fields.StringField({ required: true, blank: false }),
             leaderId:  new fields.StringField({ initial: '' }),
-            memberIds: new fields.ArrayField(new fields.StringField())
+            memberIds: new fields.ArrayField(new fields.StringField()),
+            // The horde's canonical marked HP and stress. Every member token mirrors
+            // these; a member's own value is only a report to reconcile against.
+            hp:        new fields.NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+            stress:    new fields.NumberField({ required: true, integer: true, min: 0, initial: 0 })
         };
     }
 }
@@ -94,7 +98,7 @@ export class Config {
     static getGroups() {
         const raw = game.settings.get(MODULE_ID, 'groups') ?? [];
         const cleaned = raw.filter(g => game.scenes.get(g.sceneId));
-        if (cleaned.length !== raw.length) {
+        if (cleaned.length !== raw.length && game.users.activeGM?.isSelf) {
             game.settings.set(MODULE_ID, 'groups', cleaned);
         }
         return cleaned;
@@ -148,18 +152,21 @@ export class Config {
     /**
      * Creates a new horde group entry and persists it.
      * Generates a stable unique ID via foundry.utils.randomID().
-     * @param {object} data - { sceneId, leaderId, memberIds }
+     * @param {object} data - { sceneId, leaderId, memberIds, hp, stress }
      * @returns {Promise<object>} The newly created group object
      */
     static async createGroup(data) {
-        const group = {
+        const group = new HordeGroupDataModel({
             id: foundry.utils.randomID(),
             sceneId: data.sceneId,
             leaderId: data.leaderId ?? '',
-            memberIds: data.memberIds ?? []
-        };
-        new HordeGroupDataModel(group);
-        const groups = Config.getGroups();
+            memberIds: data.memberIds ?? [],
+            hp: data.hp ?? 0,
+            stress: data.stress ?? 0
+        }).toObject();
+        // game.settings.get hands back the cached array itself, so every mutator
+        // works on a clone and the cache only changes through settings.set.
+        const groups = foundry.utils.deepClone(Config.getGroups());
         groups.push(group);
         await Config.saveGroups(groups);
         return group;
@@ -168,15 +175,14 @@ export class Config {
     /**
      * Merges a delta object into an existing group identified by ID.
      * @param {string} id - Group ID
-     * @param {object} delta - Fields to merge (e.g. { leaderId, memberIds })
+     * @param {object} delta - Fields to merge (e.g. { leaderId, memberIds, hp })
      * @returns {Promise<void>}
      */
     static async updateGroup(id, delta) {
-        const groups = Config.getGroups();
+        const groups = foundry.utils.deepClone(Config.getGroups());
         const idx = groups.findIndex(g => g.id === id);
         if (idx === -1) return;
-        Object.assign(groups[idx], delta);
-        new HordeGroupDataModel(groups[idx]);
+        groups[idx] = new HordeGroupDataModel({ ...groups[idx], ...delta }).toObject();
         await Config.saveGroups(groups);
     }
 

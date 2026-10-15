@@ -1,7 +1,6 @@
 import { MODULE_ID } from './constants.js';
 import { Config } from './config.js';
 import { HordeManager } from './horde-manager.js';
-import { VisualMarkers } from './visual-markers.js';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -159,57 +158,17 @@ export class Dashboard extends HandlebarsApplicationMixin(ApplicationV2) {
 
         if (!confirmed) return;
 
-        // Delete all member tokens except the leader
-        const memberIdsToDelete = group.memberIds.filter(id => id !== group.leaderId);
-        if (memberIdsToDelete.length > 0) {
-            await canvas.scene.deleteEmbeddedDocuments('Token', memberIdsToDelete);
-        }
-
-        await Config.deleteGroup(groupId);
-        VisualMarkers._refreshAll();
-
-        ui.notifications.info(
-            `[${Config.data.modTitle}] Horde dissolved — ${memberIdsToDelete.length} token(s) removed, leader remains.`
-        );
+        await HordeManager.dissolveGroup(groupId);
         this.render(true);
     }
 
     static async #onPromoteLeader(event, target) {
-        const memberId = target.dataset.memberId;
-        const groupId  = target.dataset.groupId;
-        const group    = Config.getGroup(groupId);
-        if (!group) return;
-
-        await Config.updateGroup(groupId, { leaderId: memberId });
-        VisualMarkers._refreshAll();
-
-        const newLeaderName = Config.resolveTokenName(group.sceneId, memberId);
-        ui.notifications.info(`[${Config.data.modTitle}] ${newLeaderName} promoted to horde leader.`);
+        await HordeManager.promoteLeader(target.dataset.groupId, target.dataset.memberId);
         this.render(true);
     }
 
     static async #onRemoveMember(event, target) {
-        const memberId = target.dataset.memberId;
-        const groupId  = target.dataset.groupId;
-        const group    = Config.getGroup(groupId);
-        if (!group) return;
-
-        const updatedMembers = group.memberIds.filter(id => id !== memberId);
-
-        if (memberId === group.leaderId) {
-            if (updatedMembers.length === 0) {
-                await Config.deleteGroup(groupId);
-            } else {
-                await Config.updateGroup(groupId, {
-                    leaderId: updatedMembers[0],
-                    memberIds: updatedMembers
-                });
-            }
-        } else {
-            await Config.updateGroup(groupId, { memberIds: updatedMembers });
-        }
-
-        VisualMarkers._refreshAll();
+        await HordeManager.removeMember(target.dataset.groupId, target.dataset.memberId);
         this.render(true);
     }
 }
