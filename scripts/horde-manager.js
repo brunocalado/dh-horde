@@ -1,3 +1,10 @@
+/*!
+ * Daggerheart: Horde
+ * 2026 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
 import { MODULE_ID } from './constants.js';
 import { Config } from './config.js';
 import { VisualMarkers } from './visual-markers.js';
