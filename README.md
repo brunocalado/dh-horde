@@ -113,7 +113,7 @@ These are GM-only and update automatically as tokens are added or removed.
 Install via the Foundry VTT Module browser or paste this manifest URL:
 
 ```
-https://raw.githubusercontent.com/brunocalado/dh-horde/main/module.json
+https://github.com/brunocalado/dh-horde/releases/latest/download/module.json
 ```
 
 ---
