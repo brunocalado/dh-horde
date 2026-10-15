@@ -56,7 +56,7 @@ jobs:
           # Files go at the zip root, with no wrapper folder: hosts with their own
           # extractor (Sqyre, issue #7) don't search subfolders for module.json the
           # way Foundry's installer does.
-          zip -r module.zip module.json LICENSE scripts styles templates assets
+          zip -r module.zip module.json LICENSE lang scripts styles templates assets
 
       - name: Create GitHub release
         if: steps.check.outputs.new == 'true'
