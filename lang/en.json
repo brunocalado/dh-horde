@@ -1,0 +1,58 @@
+{
+  "DH_HORDE": {
+    "SETTINGS": {
+      "dashboardMenu": {
+        "name": "Horde Dashboard",
+        "label": "Manage Hordes",
+        "hint": "View and manage active horde groups."
+      }
+    },
+    "HUD": {
+      "title": "Horde Actions",
+      "hordeStatus": "Horde ({count} members)",
+      "readyToMultiply": "Ready to multiply",
+      "multiply": "Multiply Horde",
+      "moveClose": "Move Close",
+      "moveFar": "Move Far",
+      "moveAll": "Move All",
+      "targetHint": "Target a token to enable movement.",
+      "dissolve": "Dissolve Horde",
+      "dashboard": "Dashboard"
+    },
+    "DASHBOARD": {
+      "title": "Horde Dashboard",
+      "memberCount": "{count} members",
+      "findLeader": "Pan to leader",
+      "members": "Members",
+      "collapse": "Collapse",
+      "dissolve": "Dissolve",
+      "promoteLeader": "Promote to leader",
+      "removeMember": "Remove from horde",
+      "empty": "No active horde groups.",
+      "unknownScene": "[unknown scene]",
+      "dissolveTitle": "Dissolve Horde",
+      "dissolveConfirm": "Dissolve the horde led by <strong>{name}</strong>?<br>All members except the leader will be <strong>deleted</strong> from the canvas."
+    },
+    "TOKEN": {
+      "none": "[none]",
+      "unknown": "[unknown]"
+    },
+    "NOTIFY": {
+      "gmOnly": "GM only.",
+      "leaderNotFound": "Leader token not found on canvas.",
+      "hordeDestroyed": "Horde destroyed — all {count} token(s) eliminated.",
+      "noLinkedActor": "Token has no linked actor.",
+      "missingHp": "Token actor is missing hordeHP or hitPoints.max values.",
+      "invalidCount": "Computed horde count is 0 or negative.",
+      "creating": "Creating {count} horde tokens...",
+      "noPlacement": "Could not place any horde copies.",
+      "created": "Horde created with {count} tokens.",
+      "notInGroup": "Token is not part of a horde group.",
+      "selectTarget": "Select a target token first.",
+      "noMembers": "No horde members found on canvas.",
+      "dissolved": "Horde dissolved — {count} token(s) removed, leader remains.",
+      "promoted": "{name} promoted to horde leader.",
+      "groupDestroyed": "Horde group destroyed — no members remain."
+    }
+  }
+}

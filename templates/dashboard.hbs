@@ -7,17 +7,17 @@
           <div class="dh-badge">{{groupIndex}}</div>
           <div class="dh-info">
             <div class="dh-name">{{leaderName}}</div>
-            <div class="dh-sub">{{memberCount}} members &middot; {{sceneName}}</div>
+            <div class="dh-sub">{{localize "DH_HORDE.DASHBOARD.memberCount" count=memberCount}} &middot; {{sceneName}}</div>
           </div>
           <div class="dh-actions">
-            <button type="button" class="dh-btn dh-btn-sm" data-action="findLeader" data-group-id="{{id}}" data-tooltip="Pan to leader">
+            <button type="button" class="dh-btn dh-btn-sm" data-action="findLeader" data-group-id="{{id}}" data-tooltip="DH_HORDE.DASHBOARD.findLeader">
               <i class="fas fa-search"></i>
             </button>
             <button type="button" class="dh-btn dh-btn-sm" data-action="expand" data-group-id="{{id}}">
-              <i class="fas fa-users"></i> Members
+              <i class="fas fa-users"></i> {{localize "DH_HORDE.DASHBOARD.members"}}
             </button>
             <button type="button" class="dh-btn dh-btn-sm dh-btn-red" data-action="dissolve" data-group-id="{{id}}">
-              <i class="fas fa-times"></i> Dissolve
+              <i class="fas fa-times"></i> {{localize "DH_HORDE.DASHBOARD.dissolve"}}
             </button>
           </div>
         </div>
@@ -30,11 +30,11 @@
             </span>
             <div class="dh-member-actions">
               {{#unless isLeader}}
-              <button type="button" class="dh-btn dh-btn-xs" data-action="promoteLeader" data-group-id="{{../id}}" data-member-id="{{id}}" data-tooltip="Promote to leader">
+              <button type="button" class="dh-btn dh-btn-xs" data-action="promoteLeader" data-group-id="{{../id}}" data-member-id="{{id}}" data-tooltip="DH_HORDE.DASHBOARD.promoteLeader">
                 <i class="fas fa-crown"></i>
               </button>
               {{/unless}}
-              <button type="button" class="dh-btn dh-btn-xs dh-btn-red" data-action="removeMember" data-group-id="{{../id}}" data-member-id="{{id}}" data-tooltip="Remove from horde">
+              <button type="button" class="dh-btn dh-btn-xs dh-btn-red" data-action="removeMember" data-group-id="{{../id}}" data-member-id="{{id}}" data-tooltip="DH_HORDE.DASHBOARD.removeMember">
                 <i class="fas fa-user-minus"></i>
               </button>
             </div>
@@ -46,7 +46,7 @@
     {{else}}
       <div class="dh-empty">
         <i class="fas fa-chess-rook"></i>
-        <p>No active horde groups.</p>
+        <p>{{localize "DH_HORDE.DASHBOARD.empty"}}</p>
       </div>
     {{/if}}
   </div>

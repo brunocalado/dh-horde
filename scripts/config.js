@@ -1,7 +1,5 @@
 import { MODULE_ID } from './constants.js';
 
-const MOD_TITLE = "DH Horde";
-
 // ─────────────────────────────────────────────────────────────────────────────
 // HordeGroupDataModel — schema validation for each horde group entry
 // ─────────────────────────────────────────────────────────────────────────────
@@ -33,7 +31,7 @@ class HordeGroupDataModel extends foundry.abstract.DataModel {
 class HordeDashboardMenu extends foundry.applications.api.ApplicationV2 {
     static DEFAULT_OPTIONS = {
         id: "dh-horde-dashboard-shell",
-        window: { title: MOD_TITLE }
+        window: { title: "DH_HORDE.DASHBOARD.title" }
     };
     async _renderHTML()  { return null; }
     async _replaceHTML() {}
@@ -52,10 +50,6 @@ class HordeDashboardMenu extends foundry.applications.api.ApplicationV2 {
 // Config
 // ─────────────────────────────────────────────────────────────────────────────
 export class Config {
-    static data = {
-        modTitle: MOD_TITLE
-    };
-
     /** @type {boolean} Set to true by bootstrap after all prerequisites are ready */
     static ready = false;
 
@@ -67,9 +61,9 @@ export class Config {
 
         // ── Menu: Horde Dashboard ─────────────────────────────────────────
         game.settings.registerMenu(MODULE_ID, 'hordeDashboard', {
-            name: 'Horde Dashboard',
-            label: 'Manage Hordes',
-            hint: 'View and manage active horde groups.',
+            name: 'DH_HORDE.SETTINGS.dashboardMenu.name',
+            label: 'DH_HORDE.SETTINGS.dashboardMenu.label',
+            hint: 'DH_HORDE.SETTINGS.dashboardMenu.hint',
             icon: 'fas fa-chess-rook',
             type: HordeDashboardMenu,
             restricted: true
@@ -204,14 +198,14 @@ export class Config {
      * @returns {string}
      */
     static resolveTokenName(sceneId, tokenId) {
-        if (!tokenId) return '[none]';
+        if (!tokenId) return game.i18n.localize('DH_HORDE.TOKEN.none');
         if (canvas?.scene?.id === sceneId) {
             const liveToken = canvas.tokens.get(tokenId);
             if (liveToken) return liveToken.name;
         }
         const scene = game.scenes.get(sceneId);
         const tokenDoc = scene?.tokens?.get(tokenId);
-        return tokenDoc?.name ?? '[unknown]';
+        return tokenDoc?.name ?? game.i18n.localize('DH_HORDE.TOKEN.unknown');
     }
 
     // ─────────────────────────────────────────────────────────────────────

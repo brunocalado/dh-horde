@@ -1,6 +1,7 @@
 import { MODULE_ID } from './constants.js';
 import { Config } from './config.js';
 import { VisualMarkers } from './visual-markers.js';
+import { notify } from './helpers.js';
 import { createHordeCopies, moveHordeTowardTarget } from './horde-executor.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -178,7 +179,7 @@ export class HordeManager {
         }
 
         VisualMarkers._refreshAll();
-        ui.notifications.info(`[${Config.data.modTitle}] Horde destroyed — all ${allIds.length} token(s) eliminated.`);
+        notify('info', 'hordeDestroyed', { count: allIds.length });
     }
 
     /**
@@ -303,7 +304,7 @@ export class HordeManager {
         return HordeManager.enqueue(async () => {
             const actor = token.actor;
             if (!actor) {
-                ui.notifications.warn(`[${Config.data.modTitle}] Token has no linked actor.`);
+                notify('warn', 'noLinkedActor');
                 return;
             }
 
@@ -314,13 +315,13 @@ export class HordeManager {
             const remaining  = maxHp - currentHp;
 
             if (!hordeHp || !maxHp) {
-                ui.notifications.warn(`[${Config.data.modTitle}] Token actor is missing hordeHP or hitPoints.max values.`);
+                notify('warn', 'missingHp');
                 return;
             }
 
             const count = hordeHp * remaining;
             if (count <= 0) {
-                ui.notifications.warn(`[${Config.data.modTitle}] Computed horde count is 0 or negative.`);
+                notify('warn', 'invalidCount');
                 return;
             }
 
@@ -333,13 +334,13 @@ export class HordeManager {
             // The origin token is one of the horde's members, so only count - 1 copies
             // are needed; this keeps the initial size equal to the regeneration cap.
             const copies = count - 1;
-            ui.notifications.info(`[${Config.data.modTitle}] Creating ${copies} horde tokens...`);
+            notify('info', 'creating', { count: copies });
 
             const { ids: newIds, animations } = await createHordeCopies(token, copies);
             animations.catch(err => console.error(`${MODULE_ID} |`, err));
 
             if (copies > 0 && newIds.length === 0) {
-                ui.notifications.warn(`[${Config.data.modTitle}] Could not place any horde copies.`);
+                notify('warn', 'noPlacement');
                 return;
             }
 
@@ -353,7 +354,7 @@ export class HordeManager {
             });
 
             VisualMarkers._refreshAll();
-            ui.notifications.info(`[${Config.data.modTitle}] Horde created with ${allMemberIds.length} tokens.`);
+            notify('info', 'created', { count: allMemberIds.length });
         });
     }
 
@@ -366,13 +367,13 @@ export class HordeManager {
     static async moveHorde(token, mode) {
         const group = Config.getGroupByTokenId(token.id);
         if (!group) {
-            ui.notifications.warn(`[${Config.data.modTitle}] Token is not part of a horde group.`);
+            notify('warn', 'notInGroup');
             return;
         }
 
         const targets = [...game.user.targets];
         if (targets.length === 0) {
-            ui.notifications.warn(`[${Config.data.modTitle}] Select a target token first.`);
+            notify('warn', 'selectTarget');
             return;
         }
 
@@ -381,7 +382,7 @@ export class HordeManager {
             .filter(Boolean);
 
         if (memberTokens.length === 0) {
-            ui.notifications.warn(`[${Config.data.modTitle}] No horde members found on canvas.`);
+            notify('warn', 'noMembers');
             return;
         }
 
@@ -409,9 +410,7 @@ export class HordeManager {
             }
 
             VisualMarkers._refreshAll();
-            ui.notifications.info(
-                `[${Config.data.modTitle}] Horde dissolved — ${memberIdsToDelete.length} token(s) removed, leader remains.`
-            );
+            notify('info', 'dissolved', { count: memberIdsToDelete.length });
             return memberIdsToDelete.length;
         });
     }
@@ -424,7 +423,7 @@ export class HordeManager {
     static async dissolveHorde(token) {
         const group = Config.getGroupByTokenId(token.id);
         if (!group) {
-            ui.notifications.warn(`[${Config.data.modTitle}] Token is not part of a horde group.`);
+            notify('warn', 'notInGroup');
             return;
         }
         await HordeManager.dissolveGroup(group.id);
@@ -443,7 +442,7 @@ export class HordeManager {
             await Config.updateGroup(groupId, { leaderId: memberId });
             VisualMarkers._refreshAll();
             const leaderName = Config.resolveTokenName(group.sceneId, memberId);
-            ui.notifications.info(`[${Config.data.modTitle}] ${leaderName} promoted to horde leader.`);
+            notify('info', 'promoted', { name: leaderName });
         });
     }
 
@@ -479,7 +478,7 @@ export class HordeManager {
         if (updatedMemberIds.length === 0) {
             await Config.deleteGroup(group.id);
             VisualMarkers._refreshAll();
-            if (!quiet) ui.notifications.info(`[${Config.data.modTitle}] Horde group destroyed — no members remain.`);
+            if (!quiet) notify('info', 'groupDestroyed');
             return;
         }
 
@@ -493,7 +492,7 @@ export class HordeManager {
             VisualMarkers._refreshAll();
             if (!quiet) {
                 const leaderName = Config.resolveTokenName(group.sceneId, newLeaderId);
-                ui.notifications.info(`[${Config.data.modTitle}] ${leaderName} promoted to horde leader.`);
+                notify('info', 'promoted', { name: leaderName });
             }
             return;
         }
