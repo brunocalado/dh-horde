@@ -4,6 +4,7 @@ import { HordeHud } from './horde-hud.js';
 import { HordeManager } from './horde-manager.js';
 import { VisualMarkers } from './visual-markers.js';
 import { Dashboard } from './dashboard.js';
+import { HordeDamageFilter } from './horde-damage-filter.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DH Horde — Module bootstrap
@@ -30,6 +31,7 @@ Hooks.once('ready', async () => {
 
     HordeHud.init();
     HordeManager.init();
+    HordeDamageFilter.init();
     VisualMarkers.init();
     Dashboard.init();
 

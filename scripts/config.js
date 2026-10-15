@@ -134,6 +134,18 @@ export class Config {
     }
 
     /**
+     * Read-only variant of getGroupByTokenId, safe on player clients: it never
+     * runs the stale-scene cleanup, whose world-setting write a player is refused.
+     * @param {string} tokenId - Token document ID
+     * @returns {object|null}
+     */
+    static findGroupByTokenId(tokenId) {
+        if (!tokenId) return null;
+        const groups = game.settings.get(MODULE_ID, 'groups') ?? [];
+        return groups.find(g => g.leaderId === tokenId || g.memberIds.includes(tokenId)) ?? null;
+    }
+
+    /**
      * Creates a new horde group entry and persists it.
      * Generates a stable unique ID via foundry.utils.randomID().
      * @param {object} data - { sceneId, leaderId, memberIds }
