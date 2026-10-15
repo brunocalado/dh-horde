@@ -1,3 +1,17 @@
+# 0.0.7
+
+### Added
+- **Localization.** Every user-visible string now comes from `lang/en.json`: the settings menu, window titles, HUD and dashboard labels, tooltips, the dissolve dialog and notifications. Translations can be added as new language files.
+
+### Changed
+- Notifications keep the module name as a fixed prefix.
+
+### Fixed
+- **Horde members no longer end up with different HP, and tokens no longer fall out of their group.** Every group change (stat sync, kills, regeneration, member loss, multiply, dissolve, and promote/remove in the dashboard) now runs in one serial queue, and the group record stores the horde's HP and Stress as its single source of truth. Only the active GM reacts to document events, so two connected GMs no longer both act. Groups saved by earlier versions are not migrated: dissolve and multiply them again.
+- **Healed hordes regenerate with the right HP.** Regenerated copies used to be cloned from a snapshot of the leader and join the group only after their animation ended, so damage landing in that window left some members with different HP. They are now created with the horde's current HP and Stress and join the group at once.
+- **An area attack that hits several tokens of the same horde now marks the horde's HP once**, instead of once per token. Separate attacks still add up.
+- The leader's name in the dissolve dialog is now HTML-escaped.
+
 # 0.0.6
 
 - https://github.com/brunocalado/dh-horde/issues/3
