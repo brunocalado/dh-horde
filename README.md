@@ -1,13 +1,8 @@
 # Daggerheart: Horde
 
-> *One token. Dozens of enemies. Make your players feel the dread.*
+Putting thirty zombies on the map is easy. Moving them one by one every round, and marking HP on each of them, is where the fight slows down.
 
-A standard horde token is a lie. It says "Giant Mosquitoes × 30" in the corner of a single token, and everyone at the table imagines something terrifying — but the map shows nothing. No sense of scale. No visual threat. When a player kills half of them, the token just gets a number edited. It feels like nothing.
-
-**DH Horde fixes that.**
-
-With one click, your single horde token **explodes into dozens of individual tokens** that spread across the battlefield. Players see the swarm. They feel surrounded. When their attacks land and tokens start disappearing, the map itself tells the story. That's what a horde is supposed to feel like.
-
+Daggerheart: Horde turns one horde token into dozens of tokens with one click. Then you move the whole group with a single button, and HP marked on any of them counts for the whole horde, removing tokens from the map as it goes.
 
 ![Multiply](docs/horde1.gif)
 
@@ -15,114 +10,108 @@ With one click, your single horde token **explodes into dozens of individual tok
 
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-Donate-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/mestredigital) [![More Modules](https://img.shields.io/badge/Foundry%20VTT-More%20Modules-red?style=for-the-badge&logo=gamepad)](https://mestredigital.online/pages/projetos-en)
 
----
+## What it does
 
-## What It Does
-
-| Feature | Description |
+| Action | What happens |
 |---|---|
-| **Multiply** | Explodes one horde token into dozens of individual copies spread in a spiral around the origin |
-| **Move** | Sends the whole horde crawling toward targeted enemies — they surround targets instead of stacking on them |
-| **Dissolve** | Collapses the horde back: all copies are deleted, the leader token remains |
-| **Stat Sync** | Change HP or Stress on any one member — every other member in the horde updates instantly |
-| **Visual Markers** | Leader gets a crown. Members get a pawn badge. Always know who's who at a glance |
-| **Dashboard** | One window to see all active hordes, find leaders on the map, manage members, and dissolve groups |
+| Multiply | One horde token becomes many copies, spread in a spiral around the original |
+| Move | The horde walks toward the tokens you target and surrounds them instead of stacking on them |
+| Dissolve | All copies are deleted and the leader token stays |
+| Stat sync | HP or Stress changed on one member is copied to every other member of the horde |
+| Visual markers | The leader has a crown and the other members have a pawn badge |
+| Dashboard | One window lists every active horde, finds its leader on the map, manages members and dissolves groups |
 
-> **Grid types:** works on **square-grid** and **gridless** scenes. Hexagonal grids are not supported yet.
+It works on square-grid and gridless scenes. Hexagonal grids are not supported yet.
 
----
+## How to use it
 
-## How to Use It
+The horde actions are for the GM. The button only appears on adversaries whose type is Horde.
 
-### Step 1 — Set Up Your Horde Actor
+### Step 1: set up the horde actor
 
-Your actor needs two fields filled in:
+The module reads two values from the adversary:
 
-- `system.typeData.hordeHP` — how many HP worth of creatures are in the horde
-- `system.resources.hitPoints.max` — the HP of each individual creature
+- `system.typeData.hordeHP`, the number of creatures for each point of HP. This is the "Horde (X/HP)" value of the stat block.
+- `system.resources.hitPoints.max`, the horde's HP.
 
-The module multiplies these two numbers to calculate how many tokens to create. A horde of 5 HP × 6 creatures = 30 tokens.
+The number of tokens is the first value times the HP the horde still has (maximum HP minus the HP already marked), counting the original token. A horde with 5 creatures per HP and 6 HP, with no HP marked, becomes 30 tokens.
 
-### Step 2 — Multiply
+### Step 2: multiply
 
 1. Right-click the horde token on the canvas.
-2. Click the **chess rook icon** (Horde Actions) in the Token HUD.
+2. In the Token HUD, click the chess rook icon (**Horde Actions**).
 3. Click **Multiply Horde**.
 
-The token explodes outward — dozens of copies animate away from the origin into a spiral formation. The map fills up. Your players notice.
+The copies come out of the original token and walk to their places in a spiral around it.
 
-> The original token is automatically **unlinked from the actor** before copying, so each token has its own independent data.
+Before copying, the original token is unlinked from the actor, so each token has its own data.
 
-### Step 3 — Move the Horde
+### Step 3: move the horde
 
-1. **Target** one or more enemy tokens as the GM (click the target icon, or hold `T` while hovering).
-2. Open Horde Actions on any horde token.
-3. Choose a movement mode:
+1. Target one or more enemy tokens as the GM (with the target icon, or press `T` while hovering over the token).
+2. Open **Horde Actions** on any token of the horde.
+3. Choose how far it moves:
 
 | Button | What happens |
 |---|---|
-| **Move Close** | Each token advances toward the target by Close range — 30 in the scene's own distance units (6 cells on a standard 5 ft grid) |
-| **Move Far** | Each token advances by Far range — 60 in the scene's own distance units (12 cells on a standard 5 ft grid) |
-| **Move All** | Every token walks the full path to surround the target — they spread around it, never stacking |
+| **Move Close** | Each token advances toward the target by Close range, 30 in the scene's own distance units (6 cells on a standard 5 ft grid) |
+| **Move Far** | Each token advances by Far range, 60 in the scene's own distance units (12 cells on a standard 5 ft grid) |
+| **Move All** | Every token walks the full path and takes a place around the target, never on top of another token |
 
-The horde uses A\* pathfinding and respects walls. Tokens distribute themselves around each target so the enemies look like they're actually surrounding the players.
+The tokens find their way with A\* pathfinding and do not cross walls. When there is more than one target, the horde splits between them, each token going to the nearest one, and forms a ring around each target.
 
-### Step 4 — Damage Flows Everywhere
+### Step 4: mark damage on any token
 
-When a player attacks and you reduce HP on **any horde member**, every other member in the group **automatically gets the same HP value**. Same for Stress.
+When a player hits the horde, mark HP or Stress on any member. The module copies the new value to every other member of the horde, so you never update thirty tokens by hand.
 
-You don't need to update 30 tokens by hand. Change one, the rest follow. When HP hits 0, that token is removed from the group.
+The number of tokens follows the HP:
 
-### Step 5 — Dissolve When Done
+- Each point of HP marked removes as many tokens as the horde has creatures per HP. The token that was hit goes first, then the ones closest to it.
+- When the marked HP reaches the maximum, the whole horde is removed from the map.
+- If you clear HP, the tokens come back near the leader, up to the horde's original size.
 
-When the encounter ends (or the horde retreats), open Horde Actions and click **Dissolve Horde**.
+### Step 5: dissolve when the fight is over
 
-All member tokens are deleted. The leader token stays on the map. The group is removed from storage. Clean map, no leftover tokens.
+When the encounter ends, or the horde retreats, open **Horde Actions** and click **Dissolve Horde**.
 
-You can also dissolve from the **Dashboard** — useful if you have multiple hordes active at once.
+Every member token is deleted, the leader token stays on the map, and the group is forgotten.
 
----
+You can also dissolve a horde from the Dashboard, which helps when more than one horde is active.
 
-## The Dashboard
+## The dashboard
 
-Open it from any Horde Actions menu → **Dashboard** button.
+Open it with the **Dashboard** button in any **Horde Actions** window, or in **Game Settings** with the **Manage Hordes** button.
 
-The Dashboard lists every active horde in the world with:
+The Dashboard lists every active horde in the world. For each one it shows:
 
-- **Group index and leader name**
-- **Member count**
-- **Find** — pans the camera to the leader token and selects it
-- **Members** — expands the list to show every token, with options to promote or remove individuals
-- **Dissolve** — asks for confirmation, then deletes all members except the leader
+- the group number and the leader's name;
+- how many members it has;
+- **Find**, which moves the camera to the leader token and selects it;
+- **Members**, which opens the list of every token in the horde, where you can make one the leader or remove it from the horde;
+- **Dissolve**, which asks for confirmation and then deletes every member except the leader.
 
----
+## Visual markers
 
-## Visual Markers
+With thirty tokens on the map, small badges show which is which:
 
-The module draws small badges on horde tokens so you always know what's what — even with 30 tokens on the map:
+- the horde leader has a crown badge and a red border;
+- the other members have a pawn badge and a blue border.
 
-- 👑 **Crown badge + red border** — the horde leader
-- ♟ **Pawn badge + blue border** — a regular horde member
-
-These are GM-only and update automatically as tokens are added or removed.
-
----
+Only the GM sees them, and they update as tokens join or leave the horde.
 
 ## Translations
 
 The module ships in English. To translate it, open an [issue](https://github.com/brunocalado/dh-horde/issues) and attach a translated copy of [lang/en.json](lang/en.json), with the code of your language (for example `fr`, `de` or `pt-BR`). I add the file to the module in the next update. To update a translation later, do the same with the new file.
 
----
-
 ## Installation
 
-Install via the Foundry VTT Module browser or paste this manifest URL:
+Install it from the Foundry VTT module browser, or use this manifest link:
 
 ```
 https://github.com/brunocalado/dh-horde/releases/latest/download/module.json
 ```
 
----
+It needs Foundry VTT v14 and the Daggerheart system, version 2.10.5 or later.
 
 ## ⚖️ Credits & License
 
