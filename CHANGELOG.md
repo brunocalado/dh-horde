@@ -1,4 +1,4 @@
-# Unreleased
+# 0.0.8
 
 - [Fixed] An area attack whose action comes from a compendium again counts once per horde on Daggerheart 2.12, instead of once per token hit.
 
